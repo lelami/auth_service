@@ -42,10 +42,11 @@ func GetUserInfoV2(resp http.ResponseWriter, req *http.Request) {
 	authorUserID, _ := primitive.ObjectIDFromHex(req.Header.Get(HeaderUserID))
 	authorFullInfo, err := service.GetUserFullInfo(authorUserID)
 	if err != nil {
-		resp.WriteHeader(http.StatusNotFound)
+		resp.WriteHeader(http.StatusInternalServerError)
 		respBody.SetError(err)
 		return
 	}
+
 	switch authorFullInfo.Role {
 	case domain.UserRoleAdmin:
 		info, err := service.GetUserFullInfo(userID)

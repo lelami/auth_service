@@ -15,7 +15,7 @@ func CORS(next http.Handler) http.Handler {
 			resp.Header().Add("Access-Control-Allow-Headers", "Content-Type")
 			return
 		}
-
+		resp.Header().Add("Content-Type", "application/json")
 		next.ServeHTTP(resp, req)
 	})
 }
