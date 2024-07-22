@@ -30,7 +30,7 @@ func SignUp(lp *domain.LoginPassword) (*domain.UserToken, error) {
 		ID:       primitive.NewObjectID(),
 		Login:    lp.Login,
 		Password: hash(lp.Password),
-		Role:     "user",
+		Role:     domain.UserRoleDefault,
 	}
 
 	if err := users.SetUser(&newUser); err != nil {
@@ -102,7 +102,7 @@ func ChangePsw(up *domain.UserPassword) error {
 	return users.SetUser(user)
 }
 
-func GetUserInfo(id primitive.ObjectID) (*domain.UserInfo, error) {
+func GetUserShortInfo(id primitive.ObjectID) (*domain.UserInfo, error) {
 
 	user, err := users.GetUser(id)
 	if err != nil {
@@ -115,6 +115,12 @@ func GetUserInfo(id primitive.ObjectID) (*domain.UserInfo, error) {
 	}
 
 	return &ui, nil
+}
+
+func GetUserFullInfo(id primitive.ObjectID) (*domain.User, error) {
+
+	user, err := users.GetUser(id)
+	return user, err
 }
 
 func GetUserIDByToken(token string) (*primitive.ObjectID, error) {

@@ -2,10 +2,15 @@ package domain
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
+const (
+	UserRoleDefault = "user"
+	UserRoleAdmin   = "admin"
+)
+
 type User struct {
 	ID       primitive.ObjectID `json:"id"`
 	Login    string             `json:"login"`
-	Password string             `json:"password"`
+	Password string             `json:"-"`
 	Name     string             `json:"name"`
 	Role     string             `json:"role"`
 }
