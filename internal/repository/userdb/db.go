@@ -2,6 +2,7 @@ package userdb
 
 import (
 	"authservice/internal/domain"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

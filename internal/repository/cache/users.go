@@ -4,8 +4,9 @@ import (
 	"authservice/internal/domain"
 	"context"
 	"errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"sync"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UserCache struct {

@@ -1,10 +1,12 @@
 package httphandler
 
 import (
+	"authservice/internal/domain"
 	"authservice/internal/service"
 	"errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func AdminGetUserInfo(resp http.ResponseWriter, req *http.Request) {
@@ -29,4 +31,30 @@ func AdminGetUserInfo(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	respBody.SetData(info)
+}
+
+func AdminBlockUser(resp http.ResponseWriter, req *http.Request) {
+
+	respBody := &HTTPResponse{}
+	defer func() {
+		resp.Write(respBody.Marshall())
+	}()
+
+	var input BlockUserReq
+
+	if err := readBody(req, &input); err != nil {
+		resp.WriteHeader(http.StatusUnprocessableEntity)
+		respBody.SetError(err)
+		return
+	}
+
+	err := service.BlockUserByAdmin(&domain.UserBlocked{
+		ID:      input.ID,
+		Blocked: input.Blocked,
+	})
+	if err != nil {
+		resp.WriteHeader(http.StatusConflict)
+		respBody.SetError(err)
+		return
+	}
 }

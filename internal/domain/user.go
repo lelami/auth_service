@@ -13,6 +13,7 @@ type User struct {
 	Password string             `json:"password"`
 	Name     string             `json:"name"`
 	Role     string             `json:"role"`
+	Blocked  bool               `json:"blocked"`
 }
 
 type UserInfo struct {
@@ -33,4 +34,9 @@ type LoginPassword struct {
 type UserToken struct {
 	UserId primitive.ObjectID `json:"id"`
 	Token  string             `json:"token"`
+}
+
+type UserBlocked struct {
+	ID      primitive.ObjectID `json:"id"`
+	Blocked bool               `json:"blocked"`
 }

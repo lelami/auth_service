@@ -8,8 +8,9 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var users userdb.DB
@@ -31,6 +32,7 @@ func SignUp(lp *domain.LoginPassword) (*domain.UserToken, error) {
 		Login:    lp.Login,
 		Password: hash(lp.Password),
 		Role:     domain.UserRoleDefault,
+		Blocked:  false,
 	}
 
 	if err := users.SetUser(&newUser); err != nil {
@@ -138,4 +140,16 @@ func createToken(login string) string {
 	loginChs := md5.Sum([]byte(login))
 
 	return hex.EncodeToString(timeChs[:]) + hex.EncodeToString(loginChs[:])
+}
+
+func BlockUserByAdmin(ub *domain.UserBlocked) error {
+
+	user, err := users.GetUser(ub.ID)
+	if err != nil {
+		return err
+	}
+
+	user.Blocked = ub.Blocked
+
+	return users.SetUser(user)
 }
