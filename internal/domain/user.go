@@ -40,3 +40,8 @@ type UserBlocked struct {
 	ID      primitive.ObjectID `json:"id"`
 	Blocked bool               `json:"blocked"`
 }
+
+type UserRole struct {
+	ID   primitive.ObjectID `json:"id"`
+	Role string             `json:"role"`
+}

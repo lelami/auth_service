@@ -15,10 +15,22 @@ type BlockUserReq struct {
 	Blocked bool               `json:"blocked"`
 }
 
+type ChangeRoleReq struct {
+	ID   primitive.ObjectID `json:"id"`
+	Role string             `json:"role"`
+}
+
 func (r SetUserInfoReq) IsValid() bool {
 	return r.Name != ""
 }
 
 func (r ChangePswReq) IsValid() bool {
 	return r.Password != ""
+}
+
+func (r ChangeRoleReq) IsValid() bool {
+	if r.Role == "admin" || r.Role == "user" {
+		return true
+	}
+	return false
 }

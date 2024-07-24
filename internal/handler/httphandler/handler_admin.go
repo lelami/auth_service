@@ -58,3 +58,42 @@ func AdminBlockUser(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 }
+
+func AdminChangeRole(resp http.ResponseWriter, req *http.Request) {
+
+	respBody := &HTTPResponse{}
+	defer func() {
+		resp.Write(respBody.Marshall())
+	}()
+
+	var input ChangeRoleReq
+
+	if err := readBody(req, &input); err != nil {
+		resp.WriteHeader(http.StatusUnprocessableEntity)
+		respBody.SetError(err)
+		return
+	}
+
+	userID, _ := primitive.ObjectIDFromHex(req.Header.Get(HeaderUserID))
+	if userID == input.ID {
+		resp.WriteHeader(http.StatusForbidden)
+		respBody.SetError(errors.New("invalid input"))
+		return
+	}
+
+	if !input.IsValid() {
+		resp.WriteHeader(http.StatusBadRequest)
+		respBody.SetError(errors.New("invalid input"))
+		return
+	}
+
+	err := service.ChangeRole(&domain.UserRole{
+		ID:   input.ID,
+		Role: input.Role,
+	})
+	if err != nil {
+		resp.WriteHeader(http.StatusConflict)
+		respBody.SetError(err)
+		return
+	}
+}

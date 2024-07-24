@@ -153,3 +153,15 @@ func BlockUserByAdmin(ub *domain.UserBlocked) error {
 
 	return users.SetUser(user)
 }
+
+func ChangeRole(ur *domain.UserRole) error {
+
+	user, err := users.GetUser(ur.ID)
+	if err != nil {
+		return err
+	}
+
+	user.Role = ur.Role
+
+	return users.SetUser(user)
+}
