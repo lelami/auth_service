@@ -1,0 +1,54 @@
+POST http://localhost:8000/sign_up HTTP/1.1
+content-type: application/json
+
+{
+    "login": "user_1",
+    "password": "12345"
+}
+
+###
+
+POST http://localhost:8000/sign_up HTTP/1.1
+content-type: application/json
+
+{
+    "login": "user_2",
+    "password": "abcdef"
+}
+
+###
+
+GET http://localhost:8000/sign_in HTTP/1.1
+content-type: application/json
+
+{
+    "login": "user_2",
+    "password": "abcdef"
+}
+
+###
+
+GET http://localhost:8000/sign_in HTTP/1.1
+content-type: application/json
+
+{
+    "login": "user_1",
+    "password": "12345"
+}
+
+###
+
+GET http://localhost:8000/admin/get_user_info?user_id=66a15df5b52e0e9f498b1bc6 HTTP/1.1
+Authorization: eb0ba0824ce41a68b6830ad5286f3dd815e1576abc700ddfd9438e6ad1c86100
+
+###
+POST http://localhost:8000/admin/block_user?user_id=66a15df5b52e0e9f498b1bc6 HTTP/1.1
+Authorization: eb0ba0824ce41a68b6830ad5286f3dd815e1576abc700ddfd9438e6ad1c86100
+
+###
+POST http://localhost:8000/admin/unblock_user?user_id=66a15df5b52e0e9f498b1bc6 HTTP/1.1
+Authorization: eb0ba0824ce41a68b6830ad5286f3dd815e1576abc700ddfd9438e6ad1c86100
+
+###
+POST http://localhost:8000/admin/reset_password_user?user_id=66a15df5b52e0e9f498b1bc6 HTTP/1.1
+Authorization: eb0ba0824ce41a68b6830ad5286f3dd815e1576abc700ddfd9438e6ad1c86100

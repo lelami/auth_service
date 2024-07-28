@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -23,6 +24,8 @@ func Run(host, port string, router *http.ServeMux) error {
 		Addr:    fmt.Sprintf("%s:%s", host, port),
 		Handler: router,
 	}*/
+
+	log.Println("server running ", host, ":", port)
 
 	return server.ListenAndServe()
 }

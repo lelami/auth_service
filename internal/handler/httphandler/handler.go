@@ -4,8 +4,9 @@ import (
 	"authservice/internal/domain"
 	"authservice/internal/service"
 	"errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func NewRouter() *http.ServeMux {
@@ -16,8 +17,13 @@ func NewRouter() *http.ServeMux {
 	router.Handle("/get_user_info", CORS(Auth(LogUser(http.HandlerFunc(GetUserInfo)))))
 	router.Handle("/set_user_info", CORS(Auth(LogUser(http.HandlerFunc(SetUserInfo)))))
 	router.Handle("/change_psw", CORS(Auth(LogUser(http.HandlerFunc(ChangePsw)))))
+
 	// admin handlers
 	router.Handle("/admin/get_user_info", CORS(Auth(isAdmin(LogUser(http.HandlerFunc(AdminGetUserInfo))))))
+	router.Handle("/admin/set_user_role", CORS(Auth(isAdmin(LogUser(http.HandlerFunc(AdminSetUserRole))))))
+	router.Handle("/admin/block_user", CORS(Auth(isAdmin(LogUser(http.HandlerFunc(AdminBlockUser))))))
+	router.Handle("/admin/unblock_user", CORS(Auth(isAdmin(LogUser(http.HandlerFunc(AdminUnblockUser))))))
+	router.Handle("/admin/reset_password_user", CORS(Auth(isAdmin(LogUser(http.HandlerFunc(AdminResetPasswordUser))))))
 
 	router.Handle("/v2/get_user_info", CORS(Auth(LogUser(http.HandlerFunc(GetUserInfoV2)))))
 

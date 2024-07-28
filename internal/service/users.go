@@ -4,20 +4,30 @@ import (
 	"authservice/internal/domain"
 	"authservice/internal/repository/tokendb"
 	"authservice/internal/repository/userdb"
+	"authservice/internal/service/rand"
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+const defaultPasswordLength = 8
+
+type PasswordSender interface {
+	SendPassword(psw string) error
+}
 
 var users userdb.DB
 var tokens tokendb.DB
+var pswSender PasswordSender
 
-func Init(userDB userdb.DB, tokenDB tokendb.DB) {
+func Init(userDB userdb.DB, tokenDB tokendb.DB, pswSnd PasswordSender) {
 	users = userDB
 	tokens = tokenDB
+	pswSender = pswSnd
 }
 
 func SignUp(lp *domain.LoginPassword) (*domain.UserToken, error) {
@@ -121,6 +131,57 @@ func GetUserFullInfo(id primitive.ObjectID) (*domain.User, error) {
 
 	user, err := users.GetUser(id)
 	return user, err
+}
+
+func SetUserRole(id primitive.ObjectID, roleString string) error {
+	role, err := domain.RoleFromString(roleString)
+	if err != nil {
+		return errors.New("invalid role")
+	}
+
+	u, err := users.GetUser(id)
+	if err != nil {
+		return err
+	}
+
+	u.Role = role
+	return users.SetUser(u)
+}
+
+func BlockUser(id primitive.ObjectID) error {
+	u, err := users.GetUser(id)
+	if err != nil {
+		return err
+	}
+
+	u.Blocked = true
+	return users.SetUser(u)
+}
+
+func UnblockUser(id primitive.ObjectID) error {
+	u, err := users.GetUser(id)
+	if err != nil {
+		return err
+	}
+
+	u.Blocked = false
+	return users.SetUser(u)
+}
+
+func ResetPasswordUser(id primitive.ObjectID) error {
+	u, err := users.GetUser(id)
+	if err != nil {
+		return err
+	}
+
+	psw := rand.String(defaultPasswordLength)
+	u.Password = hash(psw)
+
+	if err := pswSender.SendPassword(psw); err != nil {
+		return err
+	}
+
+	return users.SetUser(u)
 }
 
 func GetUserIDByToken(token string) (*primitive.ObjectID, error) {

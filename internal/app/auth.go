@@ -14,6 +14,13 @@ import (
 	"syscall"
 )
 
+type logPswSender struct{}
+
+func (lps logPswSender) SendPassword(psw string) error {
+	log.Println("password sended")
+	return nil
+}
+
 func Run() {
 
 	ctx, _ := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
@@ -28,8 +35,10 @@ func Run() {
 		log.Fatalf("ERROR failed to initialize tokens database: %v", err)
 	}
 
+	var lps logPswSender
+
 	// initialize service
-	service.Init(userDB, tokenDB)
+	service.Init(userDB, tokenDB, lps)
 
 	go func() {
 		err := server.Run("localhost", "8000", httphandler.NewRouter())

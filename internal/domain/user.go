@@ -1,10 +1,27 @@
 package domain
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"errors"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+type role string
+
+func RoleFromString(s string) (role, error) {
+	switch role(s) {
+	case UserRoleDefault:
+		return UserRoleDefault, nil
+	case UserRoleAdmin:
+		return UserRoleAdmin, nil
+	default:
+		return "", errors.New("unknown role")
+	}
+}
 
 const (
-	UserRoleDefault = "user"
-	UserRoleAdmin   = "admin"
+	UserRoleDefault role = "user"
+	UserRoleAdmin        = "admin"
 )
 
 type User struct {
@@ -12,12 +29,18 @@ type User struct {
 	Login    string             `json:"login"`
 	Password string             `json:"password"`
 	Name     string             `json:"name"`
-	Role     string             `json:"role"`
+	Role     role               `json:"role"`
+	Blocked  bool               `json:"blocked"`
 }
 
 type UserInfo struct {
 	ID   primitive.ObjectID `json:"id"`
 	Name string             `json:"name"`
+}
+
+type UserRole struct {
+	ID   primitive.ObjectID `json:"id"`
+	Role string             `json:"role"`
 }
 
 type UserPassword struct {
