@@ -4,6 +4,7 @@ import (
 	"authservice/internal/domain"
 	"context"
 	"errors"
+	"log"
 	"sync"
 	"time"
 )
@@ -78,6 +79,22 @@ func (c *OTPCache) RemoveExpiredOTPs() {
 	for code, otp := range c.otpPull {
 		if time.Now().After(otp.Expiry) {
 			delete(c.otpPull, code)
+		}
+	}
+}
+
+func (c *OTPCache) StartCleanupOTPDaemon(ctx context.Context, interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			c.RemoveExpiredOTPs()
+			log.Println("Cleanup OTPs")
+		case <-ctx.Done():
+			log.Println("Stopping OTP cleanup daemon")
+			return
 		}
 	}
 }

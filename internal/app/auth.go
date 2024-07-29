@@ -13,6 +13,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 )
 
 func Run() {
@@ -37,6 +38,12 @@ func Run() {
 
 	// initialize service
 	service.Init(userDB, tokenDB, otpDB)
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		otpDB.StartCleanupOTPDaemon(ctx, 1*time.Minute)
+	}()
 
 	wg.Add(1)
 	go func() {
