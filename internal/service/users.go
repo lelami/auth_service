@@ -238,21 +238,21 @@ func TgSignIn(l *domain.Login) error {
 	return nil
 }
 
-func TgCheckOTP(uc *domain.Code) (*domain.UserToken, error) {
+func TgCheckOTP(id primitive.ObjectID, uc *domain.Code) (*domain.UserToken, error) {
 
 	userOTP, ok := otps.CheckExistOTP(uc.Code)
 	if !ok {
 		return nil, errors.New("OTP not found")
 	}
 
-	user, err := users.GetUser(userOTP.UserID)
+	user, err := users.GetUser(id)
 	if err != nil {
 		return nil, err
 	}
 
 	var token string
 
-	if user.ID == uc.UserID {
+	if id == userOTP.UserID {
 		token = createToken(user.Login)
 	} else {
 		return nil, errors.New("wrong code")
@@ -262,12 +262,12 @@ func TgCheckOTP(uc *domain.Code) (*domain.UserToken, error) {
 		return nil, err
 	}
 
-	if err := tokens.SetUserToken(token, uc.UserID); err != nil {
+	if err := tokens.SetUserToken(token, id); err != nil {
 		return nil, err
 	}
 
 	return &domain.UserToken{
-		UserId: uc.UserID,
+		UserId: id,
 		Token:  token,
 	}, nil
 }

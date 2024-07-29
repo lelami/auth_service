@@ -76,6 +76,5 @@ type Login struct {
 }
 
 type Code struct {
-	UserID primitive.ObjectID `json:"id"`
-	Code   string             `json:"code"`
+	Code string `json:"code"`
 }

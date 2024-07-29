@@ -253,7 +253,8 @@ func TgCheckOTP(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	userToken, err := service.TgCheckOTP(&input)
+	userID, _ := primitive.ObjectIDFromHex(req.Header.Get(HeaderUserID))
+	userToken, err := service.TgCheckOTP(userID, &input)
 	if err != nil {
 		resp.WriteHeader(http.StatusNotFound)
 		respBody.SetError(err)
