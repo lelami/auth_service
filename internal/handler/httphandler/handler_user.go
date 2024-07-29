@@ -5,9 +5,11 @@ import (
 	"authservice/internal/service"
 	"encoding/json"
 	"errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"fmt"
 	"io"
 	"net/http"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func SignUp(resp http.ResponseWriter, req *http.Request) {
@@ -151,6 +153,52 @@ func ChangePsw(resp http.ResponseWriter, req *http.Request) {
 		respBody.SetError(err)
 		return
 	}
+}
+
+// Логично конечно было бы расширить SetUserInfo, но придерживаемся
+// бизнес задачам)
+func SetUserTgLink(resp http.ResponseWriter, req *http.Request) {
+	const BotLink = "https://t.me/auth_test_dim_tur_bot"
+
+	respBody := &HTTPResponse{}
+	defer func() {
+		resp.Write(respBody.Marshall())
+	}()
+
+	var input SetUserTgLinkReq
+
+	if err := readBody(req, &input); err != nil {
+		resp.WriteHeader(http.StatusUnprocessableEntity)
+		respBody.SetError(err)
+		return
+	}
+
+	if !input.IsValid() {
+		resp.WriteHeader(http.StatusBadRequest)
+		respBody.SetError(errors.New("invalid input"))
+		return
+	}
+
+	normalizedUsername := normalizeTgLink(input.TgLink)
+	fmt.Printf("Normalized username: %s\n", normalizedUsername)
+	if normalizedUsername == "" {
+		resp.WriteHeader(http.StatusBadRequest)
+		respBody.SetError(errors.New("invalid input"))
+	}
+
+	userID, _ := primitive.ObjectIDFromHex(req.Header.Get(HeaderUserID))
+	if err := service.SetUserTgLink(&domain.UserTgLink{
+		ID:     userID,
+		TgLink: normalizedUsername,
+	}); err != nil {
+		resp.WriteHeader(http.StatusNotFound)
+		respBody.SetError(err)
+		return
+	}
+
+	// Делаем редирект на бота, чтобы пользователь начал с ним чат
+	// Это связано с безопасностью ТГ
+	http.Redirect(resp, req, BotLink, http.StatusSeeOther)
 }
 
 func readBody(req *http.Request, s any) error {

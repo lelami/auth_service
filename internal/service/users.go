@@ -165,3 +165,7 @@ func ChangeRole(ur *domain.UserRole) error {
 
 	return users.SetUser(user)
 }
+
+func SetUserTgLink(utg *domain.UserTgLink) error {
+	return users.SetUserTgLink(utg)
+}

@@ -14,6 +14,8 @@ type User struct {
 	Name     string             `json:"name"`
 	Role     string             `json:"role"`
 	Blocked  bool               `json:"blocked"`
+	TgLink   string             `json:"tg_link"`
+	ChatID   string             `json:"chat_id"`
 }
 
 type UserInfo struct {
@@ -44,4 +46,20 @@ type UserBlocked struct {
 type UserRole struct {
 	ID   primitive.ObjectID `json:"id"`
 	Role string             `json:"role"`
+}
+
+type UserTgLink struct {
+	ID     primitive.ObjectID `json:"id"`
+	TgLink string             `json:"tg_link"`
+}
+
+type TgMessage struct {
+	ChatID string `json:"chat_id"`
+	Text   string `json:"text"`
+}
+
+type UserChatID struct {
+	ID     primitive.ObjectID `json:"id"`
+	TgLink string             `json:"tg_link"`
+	ChatID string             `json:"chat_id"`
 }

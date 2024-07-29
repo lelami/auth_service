@@ -31,11 +31,20 @@ func Run() {
 	// initialize service
 	service.Init(userDB, tokenDB)
 
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		err := server.Run("localhost", "8000", httphandler.NewRouter())
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatal("ERROR server run ", err)
 		}
+	}()
+
+	// start tg bot
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		RunTG(ctx, userDB)
 	}()
 
 	log.Println("INFO auth service is running")
