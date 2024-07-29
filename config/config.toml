@@ -1,0 +1,6 @@
+TelegramBotToken = "7391650942:AAENvCBC8wTQXnaAFOBWpEQtm7eTR3mxFWw"
+TgBotHost = "api.telegram.org"
+BatchSize = 100
+BotLink = "https://t.me/auth_test_dim_tur_bot"
+Host = "localhost"
+Port = "8000"

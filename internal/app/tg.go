@@ -4,17 +4,16 @@ import (
 	"context"
 	"log"
 
+	"authservice/config"
 	event_consumer "authservice/internal/consumer/event-consumer"
 	"authservice/internal/events/telegram"
 	"authservice/internal/repository/userdb"
 	"authservice/internal/server"
 )
 
-const (
-	batchSize = 100
-)
-
 func RunTG(ctx context.Context, userDB userdb.DB) {
+	cfg := config.GetConfig()
+
 	server.InitTelegramClient()
 
 	eventsProcessor := telegram.New(
@@ -24,7 +23,7 @@ func RunTG(ctx context.Context, userDB userdb.DB) {
 
 	log.Print("INFO tg bot started")
 
-	consumer := event_consumer.New(ctx, eventsProcessor, eventsProcessor, batchSize)
+	consumer := event_consumer.New(ctx, eventsProcessor, eventsProcessor, cfg.BatchSize)
 	if err := consumer.Start(); err != nil {
 		log.Fatal("INFO tg bot is stopped", err)
 	}

@@ -1,6 +1,7 @@
 package httphandler
 
 import (
+	"authservice/config"
 	"authservice/internal/domain"
 	"authservice/internal/service"
 	"encoding/json"
@@ -11,8 +12,6 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-const BotLink = "https://t.me/auth_test_dim_tur_bot"
 
 func SignUp(resp http.ResponseWriter, req *http.Request) {
 
@@ -161,6 +160,8 @@ func ChangePsw(resp http.ResponseWriter, req *http.Request) {
 // бизнес задачам)
 func SetUserTgLink(resp http.ResponseWriter, req *http.Request) {
 
+	cfg := config.GetConfig()
+
 	respBody := &HTTPResponse{}
 	defer func() {
 		resp.Write(respBody.Marshall())
@@ -199,7 +200,7 @@ func SetUserTgLink(resp http.ResponseWriter, req *http.Request) {
 
 	// Делаем редирект на бота, чтобы пользователь начал с ним чат
 	// Это связано с безопасностью ТГ
-	http.Redirect(resp, req, BotLink, http.StatusSeeOther)
+	http.Redirect(resp, req, cfg.BotLink, http.StatusSeeOther)
 }
 
 func ResetPsw(resp http.ResponseWriter, req *http.Request) {

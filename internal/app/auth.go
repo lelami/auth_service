@@ -1,12 +1,14 @@
 package app
 
 import (
+	"authservice/config"
 	"authservice/internal/handler/httphandler"
 	"authservice/internal/repository/cache"
 	"authservice/internal/server"
 	"authservice/internal/service"
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"os/signal"
@@ -15,6 +17,9 @@ import (
 )
 
 func Run() {
+
+	cfg := config.GetConfig()
+	fmt.Printf(cfg.Host, cfg.Port)
 
 	ctx, _ := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	var wg sync.WaitGroup
@@ -38,7 +43,7 @@ func Run() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		err := server.Run("localhost", "8000", httphandler.NewRouter())
+		err := server.Run(cfg.Host, cfg.Port, httphandler.NewRouter())
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatal("ERROR server run ", err)
 		}
