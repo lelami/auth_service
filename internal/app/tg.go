@@ -4,22 +4,21 @@ import (
 	"context"
 	"log"
 
-	tgClient "authservice/internal/clients/telegram"
 	event_consumer "authservice/internal/consumer/event-consumer"
 	"authservice/internal/events/telegram"
 	"authservice/internal/repository/userdb"
+	"authservice/internal/server"
 )
 
 const (
-	tgBotHost        = "api.telegram.org"
-	batchSize        = 100
-	telegramBotToken = "7391650942:AAENvCBC8wTQXnaAFOBWpEQtm7eTR3mxFWw"
+	batchSize = 100
 )
 
 func RunTG(ctx context.Context, userDB userdb.DB) {
+	server.InitTelegramClient()
 
 	eventsProcessor := telegram.New(
-		tgClient.New(tgBotHost, telegramBotToken),
+		server.TgClient,
 		userDB,
 	)
 

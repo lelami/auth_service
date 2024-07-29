@@ -201,6 +201,21 @@ func SetUserTgLink(resp http.ResponseWriter, req *http.Request) {
 	http.Redirect(resp, req, BotLink, http.StatusSeeOther)
 }
 
+func ResetPsw(resp http.ResponseWriter, req *http.Request) {
+	respBody := &HTTPResponse{}
+	defer func() {
+		resp.Write(respBody.Marshall())
+	}()
+
+	userID, _ := primitive.ObjectIDFromHex(req.Header.Get(HeaderUserID))
+	err := service.ResetPsw(userID)
+	if err != nil {
+		resp.WriteHeader(http.StatusNotFound)
+		respBody.SetError(err)
+		return
+	}
+}
+
 func readBody(req *http.Request, s any) error {
 
 	body, err := io.ReadAll(req.Body)

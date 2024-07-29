@@ -120,3 +120,17 @@ func (c *UserCache) SetUserChatID(chatID *domain.UserChatID) error {
 
 	return c.SetUser(user)
 }
+
+func (c *UserCache) CheckExistChatID(id primitive.ObjectID) (*string, bool) {
+
+	c.mtx.RLock()
+	user, ok := c.userPull[id]
+	c.mtx.RUnlock()
+
+	if !ok {
+		return nil, false
+	}
+
+	chatIDStr := user.ChatID
+	return &chatIDStr, true
+}

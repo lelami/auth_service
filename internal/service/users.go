@@ -4,10 +4,14 @@ import (
 	"authservice/internal/domain"
 	"authservice/internal/repository/tokendb"
 	"authservice/internal/repository/userdb"
+	"authservice/internal/server"
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"fmt"
+	"log"
+	"strconv"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -166,6 +170,50 @@ func ChangeRole(ur *domain.UserRole) error {
 	return users.SetUser(user)
 }
 
+func ResetPsw(id primitive.ObjectID) error {
+
+	user, err := users.GetUser(id)
+	if err != nil {
+		return err
+	}
+
+	newPsw, err := randPsw()
+	if err != nil {
+		fmt.Println("Error generating password:", err)
+	}
+
+	user.Password = hash(newPsw)
+
+	// печатаем в лог
+	log.Printf("Updated psw %s -> ID %s", newPsw, id.Hex())
+
+	// или же отправляем в ТГ
+	chatID, ok := users.CheckExistChatID(id)
+	if ok && chatID != nil {
+		chatIDInt, err := strconv.Atoi(*chatID)
+		if err != nil {
+			log.Println("Error converting chatID to int:", err)
+			return err
+		}
+
+		msg := fmt.Sprintf("Ваш новый пароль: %s", newPsw)
+		if err := sendMsgToTg(chatIDInt, msg); err != nil {
+			return err
+		}
+	}
+
+	return users.SetUser(user)
+}
+
 func SetUserTgLink(utg *domain.UserTgLink) error {
 	return users.SetUserTgLink(utg)
+}
+
+func sendMsgToTg(chatIDInt int, msg string) error {
+	if err := server.TgClient.SendMessage(chatIDInt, msg); err != nil {
+		log.Println("Error sending message to Telegram:", err)
+		return err
+	}
+	log.Println("Message sent to chat ID:", chatIDInt)
+	return nil
 }

@@ -14,3 +14,9 @@ authorization: d37a11d6f89bf99b904aebebd5e5241921232f297a57a5a743894a0e4a801fc3
 }
 
 ###
+
+POST http://localhost:8000/reset_psw
+content-type: application/json
+authorization: d37a11d6f89bf99b904aebebd5e5241921232f297a57a5a743894a0e4a801fc3
+
+###
