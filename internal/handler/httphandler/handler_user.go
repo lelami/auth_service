@@ -1,7 +1,7 @@
 package httphandler
 
 import (
-	"authservice/config"
+	"authservice/internal/config"
 	"authservice/internal/domain"
 	"authservice/internal/service"
 	"encoding/json"
@@ -156,8 +156,8 @@ func ChangePsw(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// Логично конечно было бы расширить SetUserInfo, но придерживаемся
-// бизнес задачам)
+// Of course, it would be logical to expand SetUserInfo,
+// but we stick to business tasks.
 func SetUserTgLink(resp http.ResponseWriter, req *http.Request) {
 
 	cfg := config.GetConfig()
@@ -190,7 +190,7 @@ func SetUserTgLink(resp http.ResponseWriter, req *http.Request) {
 
 	userID, _ := primitive.ObjectIDFromHex(req.Header.Get(HeaderUserID))
 	if err := service.SetUserTgLink(&domain.UserTgLink{
-		ID:     userID,
+		UserID: userID,
 		TgLink: normalizedUsername,
 	}); err != nil {
 		resp.WriteHeader(http.StatusNotFound)
@@ -198,8 +198,8 @@ func SetUserTgLink(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Делаем редирект на бота, чтобы пользователь начал с ним чат
-	// Это связано с безопасностью ТГ
+	// We redirect to the bot so that the user starts chatting with it
+	// This is due to the safety of TG
 	http.Redirect(resp, req, cfg.BotLink, http.StatusSeeOther)
 }
 

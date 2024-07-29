@@ -49,7 +49,7 @@ func AdminBlockUser(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	err := service.BlockUserByAdmin(&domain.UserBlocked{
-		ID:      input.ID,
+		UserID:  input.ID,
 		Blocked: input.Blocked,
 	})
 	if err != nil {
@@ -88,8 +88,8 @@ func AdminChangeRole(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	err := service.ChangeRole(&domain.UserRole{
-		ID:   input.ID,
-		Role: input.Role,
+		UserID: input.ID,
+		Role:   input.Role,
 	})
 	if err != nil {
 		resp.WriteHeader(http.StatusConflict)

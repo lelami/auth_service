@@ -43,27 +43,22 @@ type UserToken struct {
 }
 
 type UserBlocked struct {
-	ID      primitive.ObjectID `json:"id"`
+	UserID  primitive.ObjectID `json:"id"`
 	Blocked bool               `json:"blocked"`
 }
 
 type UserRole struct {
-	ID   primitive.ObjectID `json:"id"`
-	Role string             `json:"role"`
+	UserID primitive.ObjectID `json:"id"`
+	Role   string             `json:"role"`
 }
 
 type UserTgLink struct {
-	ID     primitive.ObjectID `json:"id"`
+	UserID primitive.ObjectID `json:"id"`
 	TgLink string             `json:"tg_link"`
 }
 
-type TgMessage struct {
-	ChatID string `json:"chat_id"`
-	Text   string `json:"text"`
-}
-
 type UserChatID struct {
-	ID     primitive.ObjectID `json:"id"`
+	UserID primitive.ObjectID `json:"id"`
 	TgLink string             `json:"tg_link"`
 	ChatID string             `json:"chat_id"`
 }

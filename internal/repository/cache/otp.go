@@ -15,7 +15,7 @@ type OTPCache struct {
 
 const otpDumpFileName = "otps.json"
 
-// OTPCacheInit инициализирует кэш для одноразовых кодов и загружает данные из дампа.
+// OTPCacheInit initializes the cache for one-time codes and loads data from the dump.
 func OTPCacheInit(ctx context.Context, wg *sync.WaitGroup) (*OTPCache, error) {
 	var c OTPCache
 	c.otpPull = make(map[string]*domain.UserOTP)
@@ -43,7 +43,7 @@ func (c *OTPCache) CheckExistOTP(code string) (*domain.UserOTP, bool) {
 	return otp, ok
 }
 
-// SetUserOTP добавляет или обновляет одноразовый код в кэше.
+// SetUserOTP adds or updates a one-time code in the cache.
 func (c *OTPCache) SetUserOTP(otp *domain.UserOTP) error {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
@@ -52,7 +52,7 @@ func (c *OTPCache) SetUserOTP(otp *domain.UserOTP) error {
 	return nil
 }
 
-// MarkOTPAsUsed помечает одноразовый код как использованный.
+// MarkOTPAsUsed marks the one-time code as used.
 func (c *OTPCache) MarkOTPAsUsed(code string) error {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
@@ -70,7 +70,8 @@ func (c *OTPCache) MarkOTPAsUsed(code string) error {
 	return nil
 }
 
-// RemoveExpiredOTPs удаляет просроченные одноразовые коды.
+// RemoveExpiredOTPs removes expired one-time codes.
+// Ideally, run a daemon to remove the overdue.
 func (c *OTPCache) RemoveExpiredOTPs() {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()

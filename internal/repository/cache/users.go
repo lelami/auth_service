@@ -78,15 +78,15 @@ func (c *UserCache) SetUser(newUserInfo *domain.User) error {
 }
 
 func (c *UserCache) SetUserTgLink(utg *domain.UserTgLink) error {
-	user, err := c.GetUser(utg.ID)
+	user, err := c.GetUser(utg.UserID)
 	if err != nil {
 		return err
 	}
 
 	c.mtx.Lock()
-	c.tgPull[utg.TgLink] = utg.ID
+	c.tgPull[utg.TgLink] = utg.UserID
 	c.mtx.Unlock()
-	log.Printf("Updated tgPull with link %s -> ID %s", utg.TgLink, utg.ID.Hex())
+	log.Printf("Updated tgPull with link %s -> ID %s", utg.TgLink, utg.UserID.Hex())
 
 	user.TgLink = utg.TgLink
 
@@ -114,7 +114,6 @@ func (c *UserCache) SetUserChatID(chatID *domain.UserChatID) error {
 	}
 
 	c.mtx.Lock()
-	// c.tgPull[chatID.TgLink] = user.ID
 	user.ChatID = chatID.ChatID
 	c.mtx.Unlock()
 

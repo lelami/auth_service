@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"authservice/config"
+	"authservice/internal/config"
 	event_consumer "authservice/internal/consumer/event-consumer"
 	"authservice/internal/events/telegram"
 	"authservice/internal/repository/userdb"

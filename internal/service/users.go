@@ -136,22 +136,9 @@ func GetUserIDByToken(token string) (*primitive.ObjectID, error) {
 	return tokens.GetUserByToken(token)
 }
 
-func hash(str string) string {
-	hp := sha256.Sum256([]byte(str))
-	return hex.EncodeToString(hp[:])
-}
-
-func createToken(login string) string {
-
-	timeChs := md5.Sum([]byte(time.Now().String()))
-	loginChs := md5.Sum([]byte(login))
-
-	return hex.EncodeToString(timeChs[:]) + hex.EncodeToString(loginChs[:])
-}
-
 func BlockUserByAdmin(ub *domain.UserBlocked) error {
 
-	user, err := users.GetUser(ub.ID)
+	user, err := users.GetUser(ub.UserID)
 	if err != nil {
 		return err
 	}
@@ -163,7 +150,7 @@ func BlockUserByAdmin(ub *domain.UserBlocked) error {
 
 func ChangeRole(ur *domain.UserRole) error {
 
-	user, err := users.GetUser(ur.ID)
+	user, err := users.GetUser(ur.UserID)
 	if err != nil {
 		return err
 	}
@@ -187,10 +174,10 @@ func ResetPsw(id primitive.ObjectID) error {
 
 	user.Password = hash(newPsw)
 
-	// печатаем в лог
+	// print to log
 	log.Printf("Updated psw %s -> ID %s", newPsw, id.Hex())
 
-	// или же отправляем в ТГ
+	// or sent to TG chat
 	chatID, ok := users.CheckExistChatID(id)
 	if ok && chatID != nil {
 		chatIDInt, err := strconv.Atoi(*chatID)
@@ -199,7 +186,7 @@ func ResetPsw(id primitive.ObjectID) error {
 			return err
 		}
 
-		msg := fmt.Sprintf("Ваш новый пароль: %s", newPsw)
+		msg := fmt.Sprintf("Your new password: %s", newPsw)
 		if err := sendMsgToTg(chatIDInt, msg); err != nil {
 			return err
 		}
@@ -283,6 +270,19 @@ func TgCheckOTP(uc *domain.Code) (*domain.UserToken, error) {
 		UserId: uc.UserID,
 		Token:  token,
 	}, nil
+}
+
+func hash(str string) string {
+	hp := sha256.Sum256([]byte(str))
+	return hex.EncodeToString(hp[:])
+}
+
+func createToken(login string) string {
+
+	timeChs := md5.Sum([]byte(time.Now().String()))
+	loginChs := md5.Sum([]byte(login))
+
+	return hex.EncodeToString(timeChs[:]) + hex.EncodeToString(loginChs[:])
 }
 
 func sendMsgToTg(chatIDInt int, msg string) error {

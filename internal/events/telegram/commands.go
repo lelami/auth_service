@@ -41,7 +41,7 @@ func (p *Processor) saveChatID(username string, chatID int) error {
 	user.ChatID = chatIDStr
 
 	p.storage.SetUser(user)
-	p.tg.SendMessage(chatID, msgSaved)
 	p.tg.SendMessage(chatID, msgHello)
+	p.tg.SendMessage(chatID, msgSaved)
 	return nil
 }

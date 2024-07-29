@@ -32,7 +32,7 @@ func (r SetUserInfoReq) IsValid() bool {
 	return r.Name != ""
 }
 
-// Используем regular expression для валидации user tg link.
+// We use regular expression to validate the user tg link.
 func (r SetUserTgLinkReq) IsValid() bool {
 	reLink := regexp.MustCompile(`^(?:https://t.me/|@)?([a-zA-Z0-9_]{5,32})$`)
 
@@ -47,7 +47,7 @@ func (r SetUserTgLinkReq) IsValid() bool {
 	return reUsername.MatchString(username)
 }
 
-// Извлекаем имя пользователя для отправки сообщений
+// Retrieving the username for sending messages
 func normalizeTgLink(input string) string {
 	re := regexp.MustCompile(`^(?:https://t.me/|@)?([a-zA-Z0-9_]{5,32})$`)
 

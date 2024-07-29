@@ -1,8 +1,8 @@
 package server
 
 import (
-	"authservice/config"
 	tgClient "authservice/internal/clients/telegram"
+	"authservice/internal/config"
 	"log"
 )
 

@@ -49,10 +49,10 @@ func (c *Consumer) Start() error {
 }
 
 /*
-Возможные проблемы и способы решения:
-1. Потеря событий: ретраи, возвращение в хранилище, фоллбэк, подтверждение для фетчера
-2. Обработка всей пачки: останавливаться после первой ошибки, счетчик ошибок
-3. Паралелльная обработка
+Possible problems and solutions:
+1. Loss of events: retrays, return to storage, fallback, confirmation for fetcher
+2. Processing the entire batch: stop after the first error, error counter
+3. Parallel processing
 */
 func (c *Consumer) handleEvents(events []events.Event) error {
 	for _, event := range events {
