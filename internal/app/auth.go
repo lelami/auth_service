@@ -27,9 +27,13 @@ func Run() {
 	if err != nil {
 		log.Fatalf("ERROR failed to initialize tokens database: %v", err)
 	}
+	otpDB, err := cache.OTPCacheInit(ctx, &wg)
+	if err != nil {
+		log.Fatalf("ERROR failed to initialize OTPs database: %v", err)
+	}
 
 	// initialize service
-	service.Init(userDB, tokenDB)
+	service.Init(userDB, tokenDB, otpDB)
 
 	wg.Add(1)
 	go func() {

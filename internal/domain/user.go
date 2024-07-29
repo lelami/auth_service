@@ -1,6 +1,10 @@
 package domain
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 const (
 	UserRoleDefault = "user"
@@ -62,4 +66,21 @@ type UserChatID struct {
 	ID     primitive.ObjectID `json:"id"`
 	TgLink string             `json:"tg_link"`
 	ChatID string             `json:"chat_id"`
+}
+
+type UserOTP struct {
+	UserID    primitive.ObjectID `json:"id"`
+	Code      string             `json:"code"`
+	CreatedAt time.Time          `json:"created_at"`
+	Expiry    time.Time          `json:"expiry"`
+	Used      bool               `json:"used"`
+}
+
+type Login struct {
+	Login string `json:"login"`
+}
+
+type Code struct {
+	UserID primitive.ObjectID `json:"id"`
+	Code   string             `json:"code"`
 }

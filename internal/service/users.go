@@ -2,6 +2,7 @@ package service
 
 import (
 	"authservice/internal/domain"
+	"authservice/internal/repository/otpdb"
 	"authservice/internal/repository/tokendb"
 	"authservice/internal/repository/userdb"
 	"authservice/internal/server"
@@ -19,10 +20,12 @@ import (
 
 var users userdb.DB
 var tokens tokendb.DB
+var otps otpdb.DB
 
-func Init(userDB userdb.DB, tokenDB tokendb.DB) {
+func Init(userDB userdb.DB, tokenDB tokendb.DB, otpDB otpdb.DB) {
 	users = userDB
 	tokens = tokenDB
+	otps = otpDB
 }
 
 func SignUp(lp *domain.LoginPassword) (*domain.UserToken, error) {
@@ -207,6 +210,79 @@ func ResetPsw(id primitive.ObjectID) error {
 
 func SetUserTgLink(utg *domain.UserTgLink) error {
 	return users.SetUserTgLink(utg)
+}
+
+func TgSignIn(l *domain.Login) error {
+
+	userId, ok := users.CheckExistLogin(l.Login)
+	if !ok {
+		return errors.New("user not found")
+	}
+
+	user, err := users.GetUser(*userId)
+	if err != nil {
+		return err
+	}
+
+	code := randOTP()
+	otp := &domain.UserOTP{
+		UserID:    user.ID,
+		Code:      code,
+		CreatedAt: time.Now(),
+		Expiry:    time.Now().Add(60 * time.Second),
+		Used:      false,
+	}
+
+	chatID, ok := users.CheckExistChatID(user.ID)
+	if ok && chatID != nil {
+		chatIDInt, err := strconv.Atoi(*chatID)
+		if err != nil {
+			log.Println("Error converting chatID to int:", err)
+			return err
+		}
+
+		msg := fmt.Sprintf("Your one time code: %s", code)
+		if err := sendMsgToTg(chatIDInt, msg); err != nil {
+			return err
+		}
+	}
+	otps.SetUserOTP(otp)
+
+	return nil
+}
+
+func TgCheckOTP(uc *domain.Code) (*domain.UserToken, error) {
+
+	userOTP, ok := otps.CheckExistOTP(uc.Code)
+	if !ok {
+		return nil, errors.New("OTP not found")
+	}
+
+	user, err := users.GetUser(userOTP.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	var token string
+
+	if user.ID == uc.UserID {
+		token = createToken(user.Login)
+	} else {
+		return nil, errors.New("wrong code")
+	}
+
+	if err := otps.MarkOTPAsUsed(uc.Code); err != nil {
+		return nil, err
+	}
+
+	if err := tokens.SetUserToken(token, uc.UserID); err != nil {
+		return nil, err
+	}
+
+	return &domain.UserToken{
+		UserId: uc.UserID,
+		Token:  token,
+	}, nil
 }
 
 func sendMsgToTg(chatIDInt int, msg string) error {

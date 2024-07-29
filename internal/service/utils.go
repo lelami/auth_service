@@ -3,6 +3,9 @@ package service
 import (
 	"crypto/rand"
 	"encoding/base64"
+	mr "math/rand"
+	"strconv"
+	"time"
 )
 
 const passwordLength = 15
@@ -27,4 +30,12 @@ func randPsw() (string, error) {
 	}
 
 	return password, nil
+}
+
+func randOTP() string {
+	r := mr.New(mr.NewSource(time.Now().UnixNano()))
+	randomNumber := r.Intn(9000) + 1000
+	rd := strconv.Itoa(randomNumber)
+
+	return rd
 }

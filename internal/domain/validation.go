@@ -20,3 +20,7 @@ func (ui UserInfo) IsValid() bool {
 	}
 	return true
 }
+
+func (l Login) IsValid() bool {
+	return l.Login != ""
+}

@@ -12,6 +12,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+const BotLink = "https://t.me/auth_test_dim_tur_bot"
+
 func SignUp(resp http.ResponseWriter, req *http.Request) {
 
 	respBody := &HTTPResponse{}
@@ -158,7 +160,6 @@ func ChangePsw(resp http.ResponseWriter, req *http.Request) {
 // Логично конечно было бы расширить SetUserInfo, но придерживаемся
 // бизнес задачам)
 func SetUserTgLink(resp http.ResponseWriter, req *http.Request) {
-	const BotLink = "https://t.me/auth_test_dim_tur_bot"
 
 	respBody := &HTTPResponse{}
 	defer func() {
@@ -214,6 +215,51 @@ func ResetPsw(resp http.ResponseWriter, req *http.Request) {
 		respBody.SetError(err)
 		return
 	}
+}
+
+func TgSignIn(resp http.ResponseWriter, req *http.Request) {
+	respBody := &HTTPResponse{}
+	defer func() {
+		resp.Write(respBody.Marshall())
+	}()
+
+	var input domain.Login
+	if err := readBody(req, &input); err != nil {
+		resp.WriteHeader(http.StatusUnprocessableEntity)
+		respBody.SetError(err)
+		return
+	}
+
+	if !input.IsValid() {
+		resp.WriteHeader(http.StatusBadRequest)
+		respBody.SetError(errors.New("invalid input"))
+		return
+	}
+
+	service.TgSignIn(&input)
+}
+
+func TgCheckOTP(resp http.ResponseWriter, req *http.Request) {
+	respBody := &HTTPResponse{}
+	defer func() {
+		resp.Write(respBody.Marshall())
+	}()
+
+	var input domain.Code
+	if err := readBody(req, &input); err != nil {
+		resp.WriteHeader(http.StatusUnprocessableEntity)
+		respBody.SetError(err)
+		return
+	}
+
+	userToken, err := service.TgCheckOTP(&input)
+	if err != nil {
+		resp.WriteHeader(http.StatusNotFound)
+		respBody.SetError(err)
+		return
+	}
+
+	respBody.SetData(userToken)
 }
 
 func readBody(req *http.Request, s any) error {
