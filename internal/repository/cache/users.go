@@ -72,6 +72,7 @@ func (c *UserCache) SetUser(newUserInfo *domain.User) error {
 	c.mtx.Lock()
 	c.userPull[newUserInfo.ID] = newUserInfo
 	c.loginPull[newUserInfo.Login] = newUserInfo.ID
+	c.tgPull[newUserInfo.TgLink] = newUserInfo.ID
 	c.mtx.Unlock()
 
 	return nil
@@ -84,9 +85,10 @@ func (c *UserCache) SetUserTgLink(utg *domain.UserTgLink) error {
 	}
 
 	c.mtx.Lock()
+	delete(c.tgPull, user.TgLink)
 	c.tgPull[utg.TgLink] = utg.UserID
-	c.mtx.Unlock()
 	log.Printf("Updated tgPull with link %s -> ID %s", utg.TgLink, utg.UserID.Hex())
+	c.mtx.Unlock()
 
 	user.TgLink = utg.TgLink
 
@@ -102,8 +104,8 @@ func (c *UserCache) GetUserByTgLink(tgLink string) (*primitive.ObjectID, error) 
 	return nil, errors.New("tg link not found")
 }
 
-func (c *UserCache) SetUserChatID(chatID *domain.UserChatID) error {
-	userID, err := c.GetUserByTgLink(chatID.TgLink)
+func (c *UserCache) SetUserChatID(tgLink string, chatID string) error {
+	userID, err := c.GetUserByTgLink(tgLink)
 	if err != nil {
 		return err
 	}
@@ -114,7 +116,7 @@ func (c *UserCache) SetUserChatID(chatID *domain.UserChatID) error {
 	}
 
 	c.mtx.Lock()
-	user.ChatID = chatID.ChatID
+	user.ChatID = chatID
 	c.mtx.Unlock()
 
 	return c.SetUser(user)

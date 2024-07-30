@@ -12,5 +12,6 @@ type DB interface {
 	SetUser(user *domain.User) error
 	SetUserTgLink(utg *domain.UserTgLink) error
 	GetUserByTgLink(tgLink string) (*primitive.ObjectID, error)
+	SetUserChatID(tgLink string, chatID string) error
 	CheckExistChatID(id primitive.ObjectID) (*string, bool)
 }
