@@ -64,7 +64,6 @@ authorization: d37a11d6f89bf99b904aebebd5e5241921232f297a57a5a743894a0e4a801fc3
 // One time code lives 1 min. Check bot chat
 POST http://localhost:8000/sign_in_via_tg HTTP/1.1
 content-type: application/json
-authorization: d37a11d6f89bf99b904aebebd5e5241921232f297a57a5a743894a0e4a801fc3
 
 {
     "login": "admin"
@@ -73,9 +72,11 @@ authorization: d37a11d6f89bf99b904aebebd5e5241921232f297a57a5a743894a0e4a801fc3
 ###
 
 // Confirmation code from telegram chat.
+// It might be better to pass user_id to the body. 
+// But in theory it should be written in the headers 
+// on the /sign_in_via_tg endpoint and redirect to this endpoint.
 POST http://localhost:8000/check_otp HTTP/1.1
 content-type: application/json
-authorization: d37a11d6f89bf99b904aebebd5e5241921232f297a57a5a743894a0e4a801fc3
 User-ID: 669fdf1645a8f16d244ec084
 
 {
