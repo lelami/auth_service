@@ -1,6 +1,9 @@
 package app
 
 import (
+	"authservice/internal/clients/telegram"
+	"authservice/internal/config"
+	"authservice/internal/consumer"
 	"authservice/internal/handler/httphandler"
 	"authservice/internal/repository/cache"
 	"authservice/internal/server"
@@ -12,6 +15,10 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+)
+
+const (
+	tgBotHost = "api.telegram.org"
 )
 
 func Run() {
@@ -28,11 +35,18 @@ func Run() {
 		log.Fatalf("ERROR failed to initialize tokens database: %v", err)
 	}
 
-	// initialize service
-	service.Init(userDB, tokenDB)
+	cfg, err := config.GetConfig()
+	if err != nil {
+		log.Fatalf("ERROR failed to load config file: %s", err)
+	}
 
+	tgClient := telegram.New(tgBotHost, cfg.TelegramBotToken)
+	// initialize service
+	service.Init(userDB, tokenDB, cfg.TelegramBotName)
+	consumer.Init(tgClient)
+	consumer.StartTelegramConsumer()
 	go func() {
-		err := server.Run("localhost", "8000", httphandler.NewRouter())
+		err := server.Run("", "8000", httphandler.NewRouter())
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatal("ERROR server run ", err)
 		}
