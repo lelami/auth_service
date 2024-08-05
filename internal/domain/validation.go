@@ -6,7 +6,12 @@ func (lp LoginPassword) IsValid() bool {
 	}
 	return true
 }
-
+func (lp LoginCode) IsValid() bool {
+	if lp.Login == "" || lp.Code == "" {
+		return false
+	}
+	return true
+}
 func (up UserPassword) IsValid() bool {
 	if up.Password == "" {
 		return false

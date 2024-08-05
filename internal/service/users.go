@@ -9,17 +9,24 @@ import (
 	"encoding/hex"
 	"errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"os"
 	"time"
 )
 
+// const botName = "https://t.me/OneTimeAuthBot"
+var botName string
 var users userdb.DB
 var tokens tokendb.DB
 
-func Init(userDB userdb.DB, tokenDB tokendb.DB) {
+func Init(userDB userdb.DB, tokenDB tokendb.DB, bName string) {
 	users = userDB
 	tokens = tokenDB
+	botName = bName
 }
 
+func SignInByTelegram() (string, error) {
+	return botName, nil
+}
 func SignUp(lp *domain.LoginPassword) (*domain.UserToken, error) {
 
 	if _, ok := users.CheckExistLogin(lp.Login); ok {
@@ -48,7 +55,36 @@ func SignUp(lp *domain.LoginPassword) (*domain.UserToken, error) {
 		Token:  token,
 	}, nil
 }
+func SignInByCode(lp *domain.LoginCode) (*domain.UserToken, error) {
+	userId, ok := users.CheckExistLogin(lp.Login)
+	if !ok {
+		return nil, errors.New("user not found")
+	}
 
+	user, err := users.GetUser(*userId)
+	if err != nil {
+		return nil, err
+	}
+
+	if user.OneTimeCode != hash(lp.Code) {
+		return nil, errors.New("wrong code")
+	}
+
+	token := createToken(lp.Login)
+
+	if err := tokens.SetUserToken(token, *userId); err != nil {
+		return nil, err
+	}
+	user.OneTimeCode = ""
+
+	if err = users.SetUser(user); err != nil {
+		return nil, err
+	}
+	return &domain.UserToken{
+		UserId: *userId,
+		Token:  token,
+	}, nil
+}
 func SignIn(lp *domain.LoginPassword) (*domain.UserToken, error) {
 
 	userId, ok := users.CheckExistLogin(lp.Login)
@@ -89,7 +125,30 @@ func SetUserInfo(ui *domain.UserInfo) error {
 	return users.SetUser(user)
 
 }
+func SetTelegramInfo(tgInfo *domain.TelegramInfo) error {
+	user, err := users.GetUser(tgInfo.ID)
+	if err != nil {
+		return err
+	}
+	user.TelegramName = tgInfo.Name
 
+	return users.SetUser(user)
+}
+
+func SetCode(up *domain.TgNameCode) error {
+
+	userId, ok := users.CheckExistTgName(up.Name)
+	if !ok {
+		return os.ErrNotExist
+	}
+	user, err := users.GetUser(*userId)
+	if err != nil {
+		return err
+	}
+	user.OneTimeCode = hash(up.Code)
+
+	return users.SetUser(user)
+}
 func ChangePsw(up *domain.UserPassword) error {
 
 	user, err := users.GetUser(up.ID)

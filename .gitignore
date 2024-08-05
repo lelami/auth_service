@@ -1,2 +1,6 @@
 users.json
 tokens.json
+*.exe
+.env
+.idea
+*.sum

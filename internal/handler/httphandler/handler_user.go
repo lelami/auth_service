@@ -39,7 +39,50 @@ func SignUp(resp http.ResponseWriter, req *http.Request) {
 
 	respBody.SetData(userToken)
 }
+func SignInByTelegram(resp http.ResponseWriter, req *http.Request) {
 
+	respBody := &HTTPResponse{}
+	defer func() {
+		_, _ = resp.Write(respBody.Marshall())
+	}()
+
+	tgBotName, err := service.SignInByTelegram()
+	if err != nil {
+		resp.WriteHeader(http.StatusNotFound)
+		respBody.SetError(err)
+		return
+	}
+	http.Redirect(resp, req, tgBotName, http.StatusFound)
+
+}
+func ValidateTelegramCode(resp http.ResponseWriter, req *http.Request) {
+	respBody := &HTTPResponse{}
+	defer func() {
+		_, _ = resp.Write(respBody.Marshall())
+	}()
+
+	var input domain.LoginCode
+	if err := readBody(req, &input); err != nil {
+		resp.WriteHeader(http.StatusUnprocessableEntity)
+		respBody.SetError(err)
+		return
+	}
+
+	if !input.IsValid() {
+		resp.WriteHeader(http.StatusBadRequest)
+		respBody.SetError(errors.New("invalid input"))
+		return
+	}
+
+	userToken, err := service.SignInByCode(&input)
+	if err != nil {
+		resp.WriteHeader(http.StatusNotFound)
+		respBody.SetError(err)
+		return
+	}
+
+	respBody.SetData(userToken)
+}
 func SignIn(resp http.ResponseWriter, req *http.Request) {
 
 	respBody := &HTTPResponse{}
@@ -119,6 +162,38 @@ func SetUserInfo(resp http.ResponseWriter, req *http.Request) {
 		respBody.SetError(err)
 		return
 	}
+}
+func SetTelegramName(resp http.ResponseWriter, req *http.Request) {
+	respBody := &HTTPResponse{}
+	defer func() {
+		_, _ = resp.Write(respBody.Marshall())
+	}()
+
+	var input TelegramName
+
+	if err := readBody(req, &input); err != nil {
+		resp.WriteHeader(http.StatusUnprocessableEntity)
+		respBody.SetError(err)
+		return
+	}
+
+	if !input.IsValid() {
+		resp.WriteHeader(http.StatusBadRequest)
+		respBody.SetError(errors.New("invalid input"))
+		return
+	}
+
+	userID, _ := primitive.ObjectIDFromHex(req.Header.Get(HeaderUserID))
+
+	if err := service.SetTelegramInfo(&domain.TelegramInfo{
+		ID:   userID,
+		Name: input.Name,
+	}); err != nil {
+		resp.WriteHeader(http.StatusNotFound)
+		respBody.SetError(err)
+		return
+	}
+
 }
 func ChangePsw(resp http.ResponseWriter, req *http.Request) {
 
