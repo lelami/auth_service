@@ -5,9 +5,10 @@ import (
 	"authservice/internal/service"
 	"encoding/json"
 	"errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"io"
 	"net/http"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func SignUp(resp http.ResponseWriter, req *http.Request) {
@@ -161,4 +162,80 @@ func readBody(req *http.Request, s any) error {
 	}
 
 	return json.Unmarshal(body, s)
+}
+
+func GetTelegramConnectLink(resp http.ResponseWriter, req *http.Request) {
+
+	respBody := &HTTPResponse{}
+	defer func() {
+		resp.Write(respBody.Marshall())
+	}()
+	
+	userID, _ := primitive.ObjectIDFromHex(req.Header.Get(HeaderUserID))
+
+	telegramConnectLink, err := service.GetTelegramConnectLink(userID)
+	if err != nil {
+		resp.WriteHeader(http.StatusNotFound)
+		respBody.SetError(err)
+	}
+
+	respBody.SetData(telegramConnectLink)
+}
+
+func SendTelegramAuthCode(resp http.ResponseWriter, req *http.Request) {
+
+	respBody := &HTTPResponse{}
+	defer func() {
+		resp.Write(respBody.Marshall())
+	}()
+
+	var input domain.SendTelgramAuthCode
+	if err := readBody(req, &input); err != nil {
+		resp.WriteHeader(http.StatusUnprocessableEntity)
+		respBody.SetError(err)
+		return
+	}
+
+	if !input.IsValid() {
+		resp.WriteHeader(http.StatusBadRequest)
+		respBody.SetError(errors.New("invalid input"))
+		return
+	}
+
+	err := service.SendTelegramAuthCode(&input)
+	if err != nil {
+		resp.WriteHeader(http.StatusBadRequest)
+		respBody.SetError(err)
+		return
+	}
+}
+
+func SignInByTelegram(resp http.ResponseWriter, req *http.Request) {
+
+	respBody := &HTTPResponse{}
+	defer func() {
+		resp.Write(respBody.Marshall())
+	}()
+
+	var input domain.LoginTelegram
+	if err := readBody(req, &input); err != nil {
+		resp.WriteHeader(http.StatusUnprocessableEntity)
+		respBody.SetError(err)
+		return
+	}
+
+	if !input.IsValid() {
+		resp.WriteHeader(http.StatusBadRequest)
+		respBody.SetError(errors.New("invalid input"))
+		return
+	}
+
+	userToken, err := service.SignInByTelegram(&input)
+	if err != nil {
+		resp.WriteHeader(http.StatusNotFound)
+		respBody.SetError(err)
+		return
+	}
+
+	respBody.SetData(userToken)
 }

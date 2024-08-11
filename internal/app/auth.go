@@ -1,6 +1,7 @@
 package app
 
 import (
+	"authservice/internal/config"
 	"authservice/internal/handler/httphandler"
 	"authservice/internal/repository/cache"
 	"authservice/internal/server"
@@ -27,9 +28,22 @@ func Run() {
 	if err != nil {
 		log.Fatalf("ERROR failed to initialize tokens database: %v", err)
 	}
+	telegramTokenDB, err := cache.TelegramAuthCodeCacheInit(ctx, &wg)
+	if err != nil {
+		log.Fatalf("ERROR failed to initialize tokens database: %v", err)
+	}
+
+	telegramCfg, err := config.LoadTelegramConfig()
+	if err != nil {
+		log.Fatalf("ERROR failed to load config: %v", err)
+	}
+	telegramService, err := service.NewTelegramService(telegramCfg)
+	if err != nil {
+		log.Fatalf("ERROR failed to initialize Telegram service: %v", err)
+	}
 
 	// initialize service
-	service.Init(userDB, tokenDB)
+	service.Init(userDB, tokenDB, telegramTokenDB, *telegramService)
 
 	go func() {
 		err := server.Run("localhost", "8000", httphandler.NewRouter())
@@ -38,7 +52,14 @@ func Run() {
 		}
 	}()
 
-	log.Println("INFO auth service is running")
+	go func() {
+		err := telegramService.ListenForUpdates(ctx)
+		if err != nil {
+			log.Fatalf("ERROR telegram bot failed: %v", err)
+		}
+	}()
+
+	log.Println("INFO auth ice is running")
 
 	<-ctx.Done()
 

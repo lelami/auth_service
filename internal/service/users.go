@@ -2,23 +2,16 @@ package service
 
 import (
 	"authservice/internal/domain"
-	"authservice/internal/repository/tokendb"
-	"authservice/internal/repository/userdb"
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"fmt"
+	"math/rand/v2"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-var users userdb.DB
-var tokens tokendb.DB
-
-func Init(userDB userdb.DB, tokenDB tokendb.DB) {
-	users = userDB
-	tokens = tokenDB
-}
 
 func SignUp(lp *domain.LoginPassword) (*domain.UserToken, error) {
 
@@ -110,8 +103,9 @@ func GetUserShortInfo(id primitive.ObjectID) (*domain.UserInfo, error) {
 	}
 
 	ui := domain.UserInfo{
-		ID:   user.ID,
-		Name: user.Name,
+		ID:              user.ID,
+		Name:            user.Name,
+		TelegramAccount: user.TelegramAccount,
 	}
 
 	return &ui, nil
@@ -138,4 +132,99 @@ func createToken(login string) string {
 	loginChs := md5.Sum([]byte(login))
 
 	return hex.EncodeToString(timeChs[:]) + hex.EncodeToString(loginChs[:])
+}
+
+func GetTelegramConnectLink(id primitive.ObjectID) (*domain.TelegramConnectLink, error) {
+
+	_, err := users.GetUser(id)
+	if err != nil {
+		return nil, err
+	}
+
+	link := telegramBotService.BotUrl + "?start=" + id.Hex()
+
+	return &domain.TelegramConnectLink{Link: link}, nil
+}
+
+func ConnectTelegramAccount(userId primitive.ObjectID, account *domain.TelegramAccount) error {
+
+	user, err := users.GetUser(userId)
+	if err != nil {
+		return err
+	}
+
+	user.TelegramAccount = account
+
+	return nil
+}
+
+func SendTelegramAuthCode(lp *domain.SendTelgramAuthCode) error {
+
+	userId, ok := users.CheckExistLogin(lp.Login)
+	if !ok {
+		return errors.New("user not found")
+	}
+
+	user, err := users.GetUser(*userId)
+	if err != nil {
+		return err
+	}
+
+	if !user.IsTelegramConnected() {
+		return errors.New("telegram is not connected")
+	}
+
+	code := rand.IntN(899999) + 100000 // radmon int from 100000 to 999999
+	err = telegramAuthCodes.SetUserTelegramAuthCode(code, *userId)
+	if err != nil {
+		return err
+	}
+
+	go func(code int) {
+		text := fmt.Sprintf("Ваш код авторизации: %d", code)
+		telegramBotService.SendMessage(user.TelegramAccount, text)
+	}(code)
+
+	return nil
+}
+
+func SignInByTelegram(lp *domain.LoginTelegram) (*domain.UserToken, error) {
+
+	userId, ok := users.CheckExistLogin(lp.Login)
+	if !ok {
+		return nil, errors.New("user not found")
+	}
+
+	user, err := users.GetUser(*userId)
+	if err != nil {
+		return nil, err
+	}
+
+	if !user.IsTelegramConnected() {
+		return nil, errors.New("telegram is not connected")
+	}
+
+	authCode, err := telegramAuthCodes.GetTelegramAuthCodeByUserId(*userId)
+	if err != nil {
+		return nil, err
+	}
+
+	if authCode != lp.Code {
+		return nil, errors.New("wrong code")
+	}
+
+	token := createToken(lp.Login)
+
+	if err := tokens.SetUserToken(token, *userId); err != nil {
+		return nil, err
+	}
+
+	if err := telegramAuthCodes.DeleteUserTelegramAuthCode(*userId); err != nil {
+		return nil, err
+	}
+
+	return &domain.UserToken{
+		UserId: *userId,
+		Token:  token,
+	}, nil
 }
