@@ -13,9 +13,13 @@ func NewRouter() *http.ServeMux {
 	router.Handle("/sign_up", CORS(LogUser(http.HandlerFunc(SignUp))))
 	router.Handle("/sign_in", CORS(LogUser(http.HandlerFunc(SignIn))))
 
+	router.Handle("/send_telegram_auth_code", CORS(LogUser(http.HandlerFunc(SendTelegramAuthCode))))
+	router.Handle("/sign_in_by_telegram", CORS(LogUser(http.HandlerFunc(SignInByTelegram))))
+
 	router.Handle("/get_user_info", CORS(Auth(LogUser(http.HandlerFunc(GetUserInfo)))))
 	router.Handle("/set_user_info", CORS(Auth(LogUser(http.HandlerFunc(SetUserInfo)))))
 	router.Handle("/change_psw", CORS(Auth(LogUser(http.HandlerFunc(ChangePsw)))))
+	router.Handle("/get_telegram_connect_link", CORS(Auth(LogUser(http.HandlerFunc(GetTelegramConnectLink)))))
 	// admin handlers
 	router.Handle("/admin/get_user_info", CORS(Auth(isAdmin(LogUser(http.HandlerFunc(AdminGetUserInfo))))))
 

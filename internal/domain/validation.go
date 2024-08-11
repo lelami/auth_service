@@ -20,3 +20,17 @@ func (ui UserInfo) IsValid() bool {
 	}
 	return true
 }
+
+func (lp SendTelgramAuthCode) IsValid() bool {
+	if lp.Login == "" {
+		return false
+	}
+	return true
+}
+
+func (lp LoginTelegram) IsValid() bool {
+	if lp.Login == "" || lp.Code == 0 {
+		return false
+	}
+	return true
+}

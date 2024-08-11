@@ -1,2 +1,4 @@
 users.json
 tokens.json
+telegram_auth_codes.json
+.env

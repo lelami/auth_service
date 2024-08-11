@@ -2,4 +2,8 @@ module authservice
 
 go 1.22.1
 
-require go.mongodb.org/mongo-driver v1.16.0 // indirect
+require (
+	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
+	github.com/joho/godotenv v1.5.1
+	go.mongodb.org/mongo-driver v1.16.0 // indirect
+)
