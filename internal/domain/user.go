@@ -27,6 +27,12 @@ type UserInfo struct {
 	Name string             `json:"name"`
 }
 
+type UserInfoWithRole struct {
+	ID   primitive.ObjectID `json:"id"`
+	Name string             `json:"name"`
+	Role string             `json:"role"`
+}
+
 type UserPassword struct {
 	ID       primitive.ObjectID `json:"id"`
 	Password string             `json:"password"`

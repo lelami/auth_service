@@ -13,6 +13,7 @@ type Config struct {
 	TgBotHost        string
 	BatchSize        int
 	BotLink          string
+	ServiceKey       string
 
 	Host string
 	Port string

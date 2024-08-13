@@ -4,3 +4,4 @@ BatchSize = 100
 BotLink = "https://t.me/auth_test_dim_tur_bot" # fake data
 Host = "localhost"
 Port = "8000"
+ServiceKey = "asdWQEfsdmkfmsdlgeruitEEFW12345!fwemofgwerg"

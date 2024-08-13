@@ -264,6 +264,32 @@ func TgCheckOTP(resp http.ResponseWriter, req *http.Request) {
 	respBody.SetData(userToken)
 }
 
+func GetUserWithRole(resp http.ResponseWriter, req *http.Request) {
+	cfg := config.GetConfig()
+
+	respBody := &HTTPResponse{}
+	defer func() {
+		resp.Write(respBody.Marshall())
+	}()
+
+	userID, _ := primitive.ObjectIDFromHex(req.Header.Get(HeaderUserID))
+	serviceKey := req.Header.Get(HeaderServiceKey)
+
+	if serviceKey != cfg.ServiceKey || serviceKey == "" {
+		resp.WriteHeader(http.StatusBadRequest)
+		respBody.SetError(errors.New("invalid service"))
+		return
+	}
+
+	info, err := service.GetUserInfoWithRole(userID)
+	if err != nil {
+		resp.WriteHeader(http.StatusNotFound)
+		respBody.SetError(err)
+	}
+
+	respBody.SetData(info)
+}
+
 func readBody(req *http.Request, s any) error {
 
 	body, err := io.ReadAll(req.Body)

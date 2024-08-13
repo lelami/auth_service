@@ -126,6 +126,22 @@ func GetUserShortInfo(id primitive.ObjectID) (*domain.UserInfo, error) {
 	return &ui, nil
 }
 
+func GetUserInfoWithRole(id primitive.ObjectID) (*domain.UserInfoWithRole, error) {
+
+	user, err := users.GetUser(id)
+	if err != nil {
+		return nil, err
+	}
+
+	ui := domain.UserInfoWithRole{
+		ID:   user.ID,
+		Name: user.Name,
+		Role: user.Role,
+	}
+
+	return &ui, nil
+}
+
 func GetUserFullInfo(id primitive.ObjectID) (*domain.User, error) {
 
 	user, err := users.GetUser(id)
