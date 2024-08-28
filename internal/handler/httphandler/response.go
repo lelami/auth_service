@@ -30,3 +30,11 @@ func (r *HTTPResponse) Marshall() []byte {
 	}
 	return body
 }
+
+type ErrorResponse struct {
+	Message string `json:"message" example:"login already exists"`
+}
+
+type RedirectTgLink struct {
+	RedirectURL string `json:"redirect_url"`
+}

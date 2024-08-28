@@ -1,0 +1,101 @@
+###
+
+// Needs to check user full user info
+GET http://localhost:8000/v2/get_user_info
+    ?user_id=669fdf1645a8f16d244ec084 HTTP/1.1
+content-type: application/json
+authorization: d37a11d6f89bf99b904aebebd5e5241921232f297a57a5a743894a0e4a801fc3
+
+###
+
+// Needs to check user full user info
+GET http://localhost:8000/admin/get_user_info?user_id=66a0a8ecd7e0e27b089ad983 HTTP/1.1
+content-type: application/json
+authorization: d37a11d6f89bf99b904aebebd5e5241921232f297a57a5a743894a0e4a801fc3
+
+###
+
+// Needs to check user full user info
+GET http://localhost:8000/v2/get_user_info
+    ?user_id=66cdd333fa68b6c0b5caebd7 HTTP/1.1
+content-type: application/json
+authorization: d8b9cb6933355c00d8347689f214678e7e58d63b60197ceb55a1c487989a3720
+
+###
+
+// Block/unblock user
+GET http://localhost:8000/admin/block_user HTTP/1.1
+content-type: application/json
+authorization: d37a11d6f89bf99b904aebebd5e5241921232f297a57a5a743894a0e4a801fc3
+
+{
+    "id": "66a0a8ecd7e0e27b089ad983",
+    "blocked": false
+}
+
+###
+
+// Change role for user
+GET http://localhost:8000/admin/change_role HTTP/1.1
+content-type: application/json
+authorization: d37a11d6f89bf99b904aebebd5e5241921232f297a57a5a743894a0e4a801fc3
+
+{
+    "id": "66a0a8ecd7e0e27b089ad983",
+    "role": "admin"
+}
+
+###
+
+// Linking telegram to account.
+// Redirect to the bot's TG, where you need to send the command "/start".
+// Link looks like "dmitrii_turetskikh", "@dmitrii_turetskikh", "https://t.me/dmitrii_turetskikh"
+POST http://localhost:8000/set_tg_link HTTP/1.1
+content-type: application/json
+authorization: d37a11d6f89bf99b904aebebd5e5241921232f297a57a5a743894a0e4a801fc3
+
+{
+    "tg_link": "@dmitrii_turetskikh"
+}
+
+###
+
+// Reset user's password
+POST http://localhost:8000/reset_psw HTTP/1.1
+content-type: application/json
+authorization: d37a11d6f89bf99b904aebebd5e5241921232f297a57a5a743894a0e4a801fc3
+
+###
+
+// Login with login and sending one time code to telegram chat.
+// One time code lives 1 min. Check bot chat
+POST http://localhost:8000/sign_in_via_tg HTTP/1.1
+content-type: application/json
+
+{
+    "login": "admin"
+}
+
+###
+
+// Confirmation code from telegram chat.
+// It might be better to pass user_id to the body. 
+// But in theory it should be written in the headers 
+// on the /sign_in_via_tg endpoint and redirect to this endpoint.
+POST http://localhost:8000/check_otp HTTP/1.1
+content-type: application/json
+User-ID: 669fdf1645a8f16d244ec084
+
+{
+    "code": "8985"
+}
+
+###
+
+POST http://localhost:8000/sign_up HTTP/1.1
+content-type: application/json
+
+{
+    "login": "string",
+    "password": "string"
+}

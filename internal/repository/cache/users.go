@@ -4,13 +4,16 @@ import (
 	"authservice/internal/domain"
 	"context"
 	"errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"log"
 	"sync"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UserCache struct {
 	userPull  map[primitive.ObjectID]*domain.User
 	loginPull map[string]primitive.ObjectID
+	tgPull    map[string]primitive.ObjectID
 	mtx       sync.RWMutex
 }
 
@@ -21,6 +24,7 @@ func UserCacheInit(ctx context.Context, wg *sync.WaitGroup) (*UserCache, error) 
 	var c UserCache
 	c.userPull = make(map[primitive.ObjectID]*domain.User)
 	c.loginPull = make(map[string]primitive.ObjectID)
+	c.tgPull = make(map[string]primitive.ObjectID)
 
 	wg.Add(1)
 	go func() {
@@ -35,6 +39,7 @@ func UserCacheInit(ctx context.Context, wg *sync.WaitGroup) (*UserCache, error) 
 
 	for _, user := range c.userPull {
 		c.loginPull[user.Login] = user.ID
+		c.tgPull[user.TgLink] = user.ID
 	}
 
 	return &c, nil
@@ -67,7 +72,66 @@ func (c *UserCache) SetUser(newUserInfo *domain.User) error {
 	c.mtx.Lock()
 	c.userPull[newUserInfo.ID] = newUserInfo
 	c.loginPull[newUserInfo.Login] = newUserInfo.ID
+	c.tgPull[newUserInfo.TgLink] = newUserInfo.ID
 	c.mtx.Unlock()
 
 	return nil
+}
+
+func (c *UserCache) SetUserTgLink(utg *domain.UserTgLink) error {
+	user, err := c.GetUser(utg.UserID)
+	if err != nil {
+		return err
+	}
+
+	c.mtx.Lock()
+	delete(c.tgPull, user.TgLink)
+	c.tgPull[utg.TgLink] = utg.UserID
+	log.Printf("Updated tgPull with link %s -> ID %s", utg.TgLink, utg.UserID.Hex())
+	c.mtx.Unlock()
+
+	user.TgLink = utg.TgLink
+
+	return c.SetUser(user)
+}
+
+func (c *UserCache) GetUserByTgLink(tgLink string) (*primitive.ObjectID, error) {
+	c.mtx.RLock()
+	defer c.mtx.RUnlock()
+	if val, ok := c.tgPull[tgLink]; ok {
+		return &val, nil
+	}
+	return nil, errors.New("tg link not found")
+}
+
+func (c *UserCache) SetUserChatID(tgLink string, chatID string) error {
+	userID, err := c.GetUserByTgLink(tgLink)
+	if err != nil {
+		return err
+	}
+
+	user, err := c.GetUser(*userID)
+	if err != nil {
+		return err
+	}
+
+	c.mtx.Lock()
+	user.ChatID = chatID
+	c.mtx.Unlock()
+
+	return c.SetUser(user)
+}
+
+func (c *UserCache) CheckExistChatID(id primitive.ObjectID) (*string, bool) {
+
+	c.mtx.RLock()
+	user, ok := c.userPull[id]
+	c.mtx.RUnlock()
+
+	if !ok {
+		return nil, false
+	}
+
+	chatIDStr := user.ChatID
+	return &chatIDStr, true
 }

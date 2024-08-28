@@ -1,6 +1,7 @@
 package app
 
 import (
+	"authservice/internal/config"
 	"authservice/internal/handler/httphandler"
 	"authservice/internal/repository/cache"
 	"authservice/internal/server"
@@ -12,9 +13,12 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 )
 
 func Run() {
+
+	cfg := config.GetConfig()
 
 	ctx, _ := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	var wg sync.WaitGroup
@@ -27,14 +31,43 @@ func Run() {
 	if err != nil {
 		log.Fatalf("ERROR failed to initialize tokens database: %v", err)
 	}
+	otpDB, err := cache.OTPCacheInit(ctx, &wg)
+	if err != nil {
+		log.Fatalf("ERROR failed to initialize OTPs database: %v", err)
+	}
 
 	// initialize service
-	service.Init(userDB, tokenDB)
+	service.Init(userDB, tokenDB, otpDB)
 
+	wg.Add(1)
 	go func() {
-		err := server.Run("localhost", "8000", httphandler.NewRouter())
+		defer wg.Done()
+		otpDB.StartCleanupOTPDaemon(ctx, 1*time.Minute)
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		err := server.Run(cfg.Host, cfg.Port, httphandler.NewRouter())
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatal("ERROR server run ", err)
+		}
+	}()
+
+	// start tg bot
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		RunTG(ctx, userDB)
+	}()
+
+	// start swagger
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		err := server.ServerDocs(ctx, "localhost:8081")
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal("ERROR swagger run ", err)
 		}
 	}()
 

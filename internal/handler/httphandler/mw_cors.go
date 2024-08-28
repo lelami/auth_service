@@ -6,16 +6,15 @@ import (
 
 func CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+		resp.Header().Set("Access-Control-Allow-Origin", "*")
+		resp.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+		resp.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, User-ID, X-Service-Key")
 
 		if req.Method == http.MethodOptions {
-			resp.Header().Set("Access-Control-Allow-Origin", "*")
-			resp.Header().Add("Access-Control-Allow-Methods", "POST")
-			resp.Header().Add("Access-Control-Allow-Methods", "GET")
-			resp.Header().Add("Access-Control-Allow-Headers", HeaderAuthorization)
-			resp.Header().Add("Access-Control-Allow-Headers", "Content-Type")
+			resp.WriteHeader(http.StatusNoContent)
 			return
 		}
-		resp.Header().Add("Content-Type", "application/json")
+
 		next.ServeHTTP(resp, req)
 	})
 }

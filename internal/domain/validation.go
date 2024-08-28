@@ -8,10 +8,7 @@ func (lp LoginPassword) IsValid() bool {
 }
 
 func (up UserPassword) IsValid() bool {
-	if up.Password == "" {
-		return false
-	}
-	return true
+	return up.Password == ""
 }
 
 func (ui UserInfo) IsValid() bool {
@@ -19,4 +16,8 @@ func (ui UserInfo) IsValid() bool {
 		return false
 	}
 	return true
+}
+
+func (l Login) IsValid() bool {
+	return l.Login != ""
 }

@@ -1,0 +1,497 @@
+basePath: /
+definitions:
+  domain.Code:
+    properties:
+      code:
+        type: string
+    type: object
+  domain.Login:
+    properties:
+      login:
+        type: string
+    type: object
+  domain.LoginPassword:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  domain.User:
+    properties:
+      blocked:
+        type: boolean
+      chat_id:
+        type: string
+      id:
+        type: string
+      login:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+      tg_link:
+        type: string
+    type: object
+  domain.UserInfo:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  domain.UserInfoWithRole:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
+    type: object
+  domain.UserPassword:
+    properties:
+      id:
+        type: string
+      password:
+        type: string
+    type: object
+  domain.UserToken:
+    properties:
+      id:
+        type: string
+      token:
+        type: string
+    type: object
+  httphandler.BlockUserReq:
+    properties:
+      blocked:
+        type: boolean
+      id:
+        type: string
+    type: object
+  httphandler.ChangePswReq:
+    properties:
+      password:
+        type: string
+    type: object
+  httphandler.ChangeRoleReq:
+    properties:
+      id:
+        type: string
+      role:
+        type: string
+    type: object
+  httphandler.ErrorResponse:
+    properties:
+      message:
+        example: login already exists
+        type: string
+    type: object
+  httphandler.RedirectTgLink:
+    properties:
+      redirect_url:
+        type: string
+    type: object
+  httphandler.SetUserInfoReq:
+    properties:
+      name:
+        type: string
+    type: object
+  httphandler.SetUserTgLinkReq:
+    properties:
+      tg_link:
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact:
+    name: API Support
+  description: This is a sample auth server with tg auth.
+  title: Auth Example API
+  version: 0.1.0
+paths:
+  /admin/block_user:
+    post:
+      parameters:
+      - description: токен админа
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: id пользователя и значение блокировки
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/httphandler.BlockUserReq'
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+        "409":
+          description: Conflict
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
+      summary: Блокировка пользователя админом
+      tags:
+      - AdminAuth
+  /admin/change_role:
+    post:
+      parameters:
+      - description: токен админа
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: id пользователя и роль
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/httphandler.ChangeRoleReq'
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+        "409":
+          description: Conflict
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
+      summary: Смена роли пользователя админом
+      tags:
+      - AdminAuth
+  /admin/get_user_info:
+    get:
+      parameters:
+      - description: токен админа
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: id пользователя
+        in: query
+        name: user_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Получение личных данных пользователя админом
+      tags:
+      - AdminAuth
+  /change_psw:
+    post:
+      parameters:
+      - description: токен пользователя
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: новый пароль пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/httphandler.ChangePswReq'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserPassword'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
+      summary: Изменение пороля пользователем
+      tags:
+      - Auth
+  /check_otp:
+    post:
+      parameters:
+      - description: 4ёх значный проверочный код
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Code'
+      - description: ID пользователя
+        in: header
+        name: User-ID
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserToken'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
+      summary: Вход по коду через телеграм
+      tags:
+      - Auth
+  /get_service_user_info:
+    get:
+      parameters:
+      - description: токен пользователя
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: сервисный ключ
+        in: header
+        name: X-Service-Key
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserInfoWithRole'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
+      summary: Используется для получения информации о пользователе другими сервисами
+      tags:
+      - Auth
+  /get_user_info:
+    get:
+      parameters:
+      - description: токен пользователя
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserInfo'
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Получение личных данных пользователя
+      tags:
+      - Auth
+  /reset_psw:
+    post:
+      parameters:
+      - description: токен пользователя
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
+      summary: Сброс пароля пользователем
+      tags:
+      - Auth
+  /set_tg_link:
+    post:
+      parameters:
+      - description: токен пользователя
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: ссылка на телеграм пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/httphandler.SetUserTgLinkReq'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/httphandler.RedirectTgLink'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
+      summary: Привязка профиля телеграм
+      tags:
+      - Auth
+  /set_user_info:
+    post:
+      parameters:
+      - description: токен пользователя
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: новое имя пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/httphandler.SetUserInfoReq'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserInfo'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
+      summary: Изменение личных данных пользователя
+      tags:
+      - Auth
+  /sign_in:
+    post:
+      parameters:
+      - description: логин и пароль нового пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.LoginPassword'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserToken'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
+      summary: Вход пользователя
+      tags:
+      - Auth
+  /sign_in_via_tg:
+    post:
+      parameters:
+      - description: логин пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Login'
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
+      summary: Отправка проверочного кода для входа через ТГ
+      tags:
+      - Auth
+  /sign_up:
+    post:
+      parameters:
+      - description: логин и пароль нового пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.LoginPassword'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserToken'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/httphandler.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
+      summary: Регистрация пользователя
+      tags:
+      - Auth
+  /v2/get_user_info:
+    get:
+      parameters:
+      - description: токен пользователя
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: id пользователя
+        in: query
+        name: user_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: Bad Request
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Получение личных данных пользователя админом
+      tags:
+      - AdminAuth
+swagger: "2.0"
