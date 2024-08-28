@@ -33,6 +33,17 @@ func NewRouter() *http.ServeMux {
 	return router
 }
 
+// GetUserInfoV2 godoc
+// @Tags AdminAuth
+// @Summary Получение личных данных пользователя админом
+// @Param Authorization header string true "токен пользователя"
+// @Param user_id query string true "id пользователя"
+// @Success 200 {object} domain.User
+// @Failure 400
+// @Failure 403
+// @Failure 404
+// @Failure 500
+// @Router /v2/get_user_info [get]
 func GetUserInfoV2(resp http.ResponseWriter, req *http.Request) {
 
 	respBody := &HTTPResponse{}

@@ -2,7 +2,14 @@
 
 // Needs to check user full user info
 GET http://localhost:8000/v2/get_user_info
-    ?user_id=66a0a8ecd7e0e27b089ad983 HTTP/1.1
+    ?user_id=669fdf1645a8f16d244ec084 HTTP/1.1
+content-type: application/json
+authorization: d37a11d6f89bf99b904aebebd5e5241921232f297a57a5a743894a0e4a801fc3
+
+###
+
+// Needs to check user full user info
+GET http://localhost:8000/admin/get_user_info?user_id=66a0a8ecd7e0e27b089ad983 HTTP/1.1
 content-type: application/json
 authorization: d37a11d6f89bf99b904aebebd5e5241921232f297a57a5a743894a0e4a801fc3
 
@@ -10,9 +17,9 @@ authorization: d37a11d6f89bf99b904aebebd5e5241921232f297a57a5a743894a0e4a801fc3
 
 // Needs to check user full user info
 GET http://localhost:8000/v2/get_user_info
-    ?user_id=669fdf1645a8f16d244ec084 HTTP/1.1
+    ?user_id=66cdd333fa68b6c0b5caebd7 HTTP/1.1
 content-type: application/json
-authorization: d37a11d6f89bf99b904aebebd5e5241921232f297a57a5a743894a0e4a801fc3
+authorization: d8b9cb6933355c00d8347689f214678e7e58d63b60197ceb55a1c487989a3720
 
 ###
 
@@ -23,7 +30,7 @@ authorization: d37a11d6f89bf99b904aebebd5e5241921232f297a57a5a743894a0e4a801fc3
 
 {
     "id": "66a0a8ecd7e0e27b089ad983",
-    "blocked": true
+    "blocked": false
 }
 
 ###
@@ -80,7 +87,15 @@ content-type: application/json
 User-ID: 669fdf1645a8f16d244ec084
 
 {
-    "code": "2765"
+    "code": "8985"
 }
 
 ###
+
+POST http://localhost:8000/sign_up HTTP/1.1
+content-type: application/json
+
+{
+    "login": "string",
+    "password": "string"
+}

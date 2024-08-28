@@ -9,6 +9,16 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// AdminGetUserInfo godoc
+// @Tags AdminAuth
+// @Summary Получение личных данных пользователя админом
+// @Param Authorization header string true "токен админа"
+// @Param user_id query string true "id пользователя"
+// @Success 200 {object} domain.User
+// @Failure 400
+// @Failure 404
+// @Failure 500
+// @Router /admin/get_user_info [get]
 func AdminGetUserInfo(resp http.ResponseWriter, req *http.Request) {
 
 	respBody := &HTTPResponse{}
@@ -33,6 +43,17 @@ func AdminGetUserInfo(resp http.ResponseWriter, req *http.Request) {
 	respBody.SetData(info)
 }
 
+// AdminBlockUser godoc
+// @Tags AdminAuth
+// @Summary Блокировка пользователя админом
+// @Param Authorization header string true "токен админа"
+// @Param request body BlockUserReq true "id пользователя и значение блокировки"
+// @Success 200
+// @Failure 404
+// @Failure 409
+// @Failure 422
+// @Failure 500
+// @Router /admin/block_user [post]
 func AdminBlockUser(resp http.ResponseWriter, req *http.Request) {
 
 	respBody := &HTTPResponse{}
@@ -59,6 +80,17 @@ func AdminBlockUser(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
+// AdminChangeRole godoc
+// @Tags AdminAuth
+// @Summary Смена роли пользователя админом
+// @Param Authorization header string true "токен админа"
+// @Param request body ChangeRoleReq true "id пользователя и роль"
+// @Success 200
+// @Failure 404
+// @Failure 409
+// @Failure 422
+// @Failure 500
+// @Router /admin/change_role [post]
 func AdminChangeRole(resp http.ResponseWriter, req *http.Request) {
 
 	respBody := &HTTPResponse{}
@@ -71,13 +103,6 @@ func AdminChangeRole(resp http.ResponseWriter, req *http.Request) {
 	if err := readBody(req, &input); err != nil {
 		resp.WriteHeader(http.StatusUnprocessableEntity)
 		respBody.SetError(err)
-		return
-	}
-
-	userID, _ := primitive.ObjectIDFromHex(req.Header.Get(HeaderUserID))
-	if userID == input.ID {
-		resp.WriteHeader(http.StatusForbidden)
-		respBody.SetError(errors.New("invalid input"))
 		return
 	}
 

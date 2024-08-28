@@ -1,7 +1,7 @@
-TelegramBotToken = "7391650942:AAENvCBC8wTQXnaAFOBWpEQtm7eTR3mxFWw" # fake data
+TelegramBotToken = "7sdfasdfgdsgfg" # fake data
 TgBotHost = "api.telegram.org"
 BatchSize = 100
-BotLink = "https://t.me/auth_test_dim_tur_bot" # fake data
+BotLink = "https://t.me/auth_test_dim_tur_v1_bot" # fake data
 Host = "localhost"
 Port = "8000"
 ServiceKey = "asdWQEfsdmkfmsdlgeruitEEFW12345!fwemofgwerg"
