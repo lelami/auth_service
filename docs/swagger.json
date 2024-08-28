@@ -1,0 +1,767 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a sample auth server with tg auth.",
+        "title": "Auth Example API",
+        "contact": {
+            "name": "API Support"
+        },
+        "version": "0.1.0"
+    },
+    "host": "localhost:8000",
+    "basePath": "/",
+    "paths": {
+        "/admin/block_user": {
+            "post": {
+                "tags": [
+                    "AdminAuth"
+                ],
+                "summary": "Блокировка пользователя админом",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "токен админа",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "id пользователя и значение блокировки",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/httphandler.BlockUserReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "409": {
+                        "description": "Conflict"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/admin/change_role": {
+            "post": {
+                "tags": [
+                    "AdminAuth"
+                ],
+                "summary": "Смена роли пользователя админом",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "токен админа",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "id пользователя и роль",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/httphandler.ChangeRoleReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "409": {
+                        "description": "Conflict"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/admin/get_user_info": {
+            "get": {
+                "tags": [
+                    "AdminAuth"
+                ],
+                "summary": "Получение личных данных пользователя админом",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "токен админа",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "id пользователя",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/change_psw": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Изменение пороля пользователем",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "токен пользователя",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "новый пароль пользователя",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/httphandler.ChangePswReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.UserPassword"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/check_otp": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Вход по коду через телеграм",
+                "parameters": [
+                    {
+                        "description": "4ёх значный проверочный код",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.Code"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID пользователя",
+                        "name": "User-ID",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.UserToken"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/get_service_user_info": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Используется для получения информации о пользователе другими сервисами",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "токен пользователя",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "сервисный ключ",
+                        "name": "X-Service-Key",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.UserInfoWithRole"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/get_user_info": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Получение личных данных пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "токен пользователя",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.UserInfo"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/reset_psw": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Сброс пароля пользователем",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "токен пользователя",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/set_tg_link": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Привязка профиля телеграм",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "токен пользователя",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "ссылка на телеграм пользователя",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/httphandler.SetUserTgLinkReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/httphandler.RedirectTgLink"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/set_user_info": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Изменение личных данных пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "токен пользователя",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "новое имя пользователя",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/httphandler.SetUserInfoReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.UserInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/sign_in": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Вход пользователя",
+                "parameters": [
+                    {
+                        "description": "логин и пароль нового пользователя",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.LoginPassword"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.UserToken"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/sign_in_via_tg": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Отправка проверочного кода для входа через ТГ",
+                "parameters": [
+                    {
+                        "description": "логин пользователя",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.Login"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/sign_up": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Регистрация пользователя",
+                "parameters": [
+                    {
+                        "description": "логин и пароль нового пользователя",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.LoginPassword"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.UserToken"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/httphandler.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/v2/get_user_info": {
+            "get": {
+                "tags": [
+                    "AdminAuth"
+                ],
+                "summary": "Получение личных данных пользователя админом",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "токен пользователя",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "id пользователя",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "domain.Code": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.Login": {
+            "type": "object",
+            "properties": {
+                "login": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.LoginPassword": {
+            "type": "object",
+            "properties": {
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.User": {
+            "type": "object",
+            "properties": {
+                "blocked": {
+                    "type": "boolean"
+                },
+                "chat_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "tg_link": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.UserInfo": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.UserInfoWithRole": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.UserPassword": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.UserToken": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "httphandler.BlockUserReq": {
+            "type": "object",
+            "properties": {
+                "blocked": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "httphandler.ChangePswReq": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "httphandler.ChangeRoleReq": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
+        "httphandler.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "login already exists"
+                }
+            }
+        },
+        "httphandler.RedirectTgLink": {
+            "type": "object",
+            "properties": {
+                "redirect_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "httphandler.SetUserInfoReq": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "httphandler.SetUserTgLinkReq": {
+            "type": "object",
+            "properties": {
+                "tg_link": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

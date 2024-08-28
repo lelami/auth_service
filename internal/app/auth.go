@@ -61,6 +61,16 @@ func Run() {
 		RunTG(ctx, userDB)
 	}()
 
+	// start swagger
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		err := server.ServerDocs(ctx, "localhost:8081")
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal("ERROR swagger run ", err)
+		}
+	}()
+
 	log.Println("INFO auth service is running")
 
 	<-ctx.Done()

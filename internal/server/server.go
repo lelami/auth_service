@@ -3,8 +3,12 @@ package server
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
+
+	"github.com/gorilla/mux"
+	sw "github.com/swaggo/http-swagger"
 )
 
 var server *http.Server
@@ -29,4 +33,24 @@ func Run(host, port string, router *http.ServeMux) error {
 
 func Shutdown() error {
 	return server.Shutdown(context.Background())
+}
+
+func ServerDocs(ctx context.Context, host string) error {
+	router := mux.NewRouter()
+	router.PathPrefix("/docs/").Handler(sw.WrapHandler)
+
+	srv := &http.Server{
+		Addr:    host,
+		Handler: router,
+	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Printf("ERROR swagger server run: %v", err)
+		}
+	}()
+
+	<-ctx.Done()
+
+	return nil
 }
