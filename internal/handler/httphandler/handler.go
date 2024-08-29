@@ -4,9 +4,32 @@ import (
 	"authservice/internal/domain"
 	"authservice/internal/service"
 	"errors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/metric"
 	"net/http"
 )
+
+var (
+	tracer = otel.Tracer("requests-tracer")
+	meter  = otel.Meter("requests-meter")
+
+	allReqCount, _    = meter.Int64Counter("requests_total", metric.WithDescription("Total number of requests"))
+	signUpReqCount, _ = meter.Int64Counter("requests_sign_up", metric.WithDescription("Sign up number of requests"))
+)
+
+func NewRouterWithTrace() *http.Handler {
+	router := NewRouter()
+
+	router.Handle("/metrics", promhttp.Handler())
+	tracedRouter := otelhttp.NewHandler(router, "requests",
+		otelhttp.WithMessageEvents(otelhttp.ReadEvents, otelhttp.WriteEvents),
+	)
+
+	return &tracedRouter
+}
 
 func NewRouter() *http.ServeMux {
 	router := http.NewServeMux()

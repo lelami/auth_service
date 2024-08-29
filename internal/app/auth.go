@@ -3,8 +3,10 @@ package app
 import (
 	"authservice/internal/handler/httphandler"
 	"authservice/internal/repository/cache"
-	"authservice/internal/server"
+	http2 "authservice/internal/server/http"
 	"authservice/internal/service"
+	"authservice/pkg/meter"
+	"authservice/pkg/tracer"
 	"context"
 	"errors"
 	"log"
@@ -14,9 +16,21 @@ import (
 	"syscall"
 )
 
+var serviceName = "Auth Service"
+
 func Run() {
 
 	ctx, _ := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	traceProv, err := tracer.InitTracer("http://localhost:14268/api/traces", serviceName)
+	if err != nil {
+		log.Fatal("init tracer", err)
+	}
+
+	meterProv, err := meter.InitMeter(ctx, serviceName)
+	if err != nil {
+		log.Fatal("init meter", err)
+	}
+
 	var wg sync.WaitGroup
 	// initialize dbs
 	userDB, err := cache.UserCacheInit(ctx, &wg)
@@ -32,7 +46,7 @@ func Run() {
 	service.Init(userDB, tokenDB)
 
 	go func() {
-		err := server.Run("localhost", "8000", httphandler.NewRouter())
+		err := http2.Run("localhost", "8000", httphandler.NewRouterWithTrace())
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatal("ERROR server run ", err)
 		}
@@ -42,10 +56,19 @@ func Run() {
 
 	<-ctx.Done()
 
-	err = server.Shutdown()
+	err = http2.Shutdown()
 	if err != nil {
 		log.Fatal("ERROR server was not gracefully shutdown", err)
 	}
+
+	if err := traceProv.Shutdown(ctx); err != nil {
+		log.Printf("Error shutting down tracer provider: %v", err)
+	}
+
+	if err := meterProv.Shutdown(ctx); err != nil {
+		log.Printf("Error shutting down meter provider: %v", err)
+	}
+
 	wg.Wait()
 
 	log.Println("INFO auth service was gracefully shutdown")
