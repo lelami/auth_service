@@ -31,6 +31,7 @@ func SignUp(lp *domain.LoginPassword) (*domain.UserToken, error) {
 		Login:    lp.Login,
 		Password: hash(lp.Password),
 		Role:     domain.UserRoleDefault,
+		Created:  time.Now(),
 	}
 
 	if err := users.SetUser(&newUser); err != nil {

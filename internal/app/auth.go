@@ -3,6 +3,7 @@ package app
 import (
 	"authservice/internal/handler/httphandler"
 	"authservice/internal/repository/cache"
+	"authservice/internal/repository/mongo"
 	http2 "authservice/internal/server/http"
 	"authservice/internal/service"
 	"authservice/pkg/meter"
@@ -33,7 +34,12 @@ func Run() {
 
 	var wg sync.WaitGroup
 	// initialize dbs
-	userDB, err := cache.UserCacheInit(ctx, &wg)
+	/*	userDB, err := cache.UserCacheInit(ctx, &wg)
+		if err != nil {
+			log.Fatalf("ERROR failed to initialize user database: %v", err)
+		}
+	*/
+	userDB, err := mongo.NewMongoClient("mongodb://admin:admin@localhost:27017/", "auth")
 	if err != nil {
 		log.Fatalf("ERROR failed to initialize user database: %v", err)
 	}
