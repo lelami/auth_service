@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -23,6 +24,15 @@ func NewMongoClient(url, dbname string) (*MClient, error) {
 
 	cl.client = client
 	cl.dbname = dbname
+
+	coll := cl.client.Database(cl.dbname).Collection(CollUsers)
+
+	if _, err = coll.Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys:    bson.M{"login": 1},
+		Options: options.Index().SetUnique(true),
+	}); err != nil {
+		return nil, err
+	}
 
 	return &cl, nil
 }
