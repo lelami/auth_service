@@ -1,9 +1,11 @@
 package app
 
 import (
+	"authservice/internal/handler"
 	"authservice/internal/handler/httphandler"
 	"authservice/internal/repository/cache"
 	"authservice/internal/repository/mongo"
+	"authservice/internal/repository/rabbitmq"
 	http2 "authservice/internal/server/http"
 	"authservice/internal/service"
 	"authservice/pkg/meter"
@@ -32,6 +34,15 @@ func Run() {
 		log.Fatal("init meter", err)
 	}
 
+	rmq, err := rabbitmq.Init("amqp://guest:guest@localhost:5672/", "test_queue")
+	if err != nil {
+		log.Fatal("init rabbit mq", err)
+	}
+
+	err = rmq.Consume("test_queue", handler.HandleAmqpMsg)
+	if err != nil {
+		return
+	}
 	var wg sync.WaitGroup
 	// initialize dbs
 	/*	userDB, err := cache.UserCacheInit(ctx, &wg)
