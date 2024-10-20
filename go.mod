@@ -3,7 +3,9 @@ module authservice
 go 1.22.1
 
 require (
+	github.com/confluentinc/confluent-kafka-go v1.9.2
 	github.com/prometheus/client_golang v1.20.2
+	github.com/streadway/amqp v1.1.0
 	go.mongodb.org/mongo-driver v1.17.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.54.0
 	go.opentelemetry.io/otel v1.29.0
@@ -28,7 +30,6 @@ require (
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
-	github.com/streadway/amqp v1.1.0 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
